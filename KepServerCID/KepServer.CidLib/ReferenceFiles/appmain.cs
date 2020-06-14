@@ -16,9 +16,9 @@ namespace CidaRefImplCsharp
 
     // This application uses a pointer to unmanaged (shared) memory.
     // To build, you must enable "Allow unsafe code" in project build properties.
-    class AppMain
+    public class CidConnector
 		{
-		public static void MainRunner (string[] args)
+		public static void Run (string[] args)
 			{
 			bool exportConfig = false;
 			string strConfigName = "";
