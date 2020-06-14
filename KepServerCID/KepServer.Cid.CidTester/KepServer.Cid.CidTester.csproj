@@ -5,4 +5,16 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="ReferenceFiles\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Threading.AccessControl" Version="4.7.0" />
+  </ItemGroup>
+
 </Project>

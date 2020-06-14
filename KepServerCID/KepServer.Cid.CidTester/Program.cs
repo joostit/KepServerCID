@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CidaRefImplCsharp;
+using System;
 
 namespace KepServer.Cid.CidTester
 {
@@ -6,7 +7,10 @@ namespace KepServer.Cid.CidTester
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Started");
+
+            AppMain.MainRunner(args);
+
         }
     }
 }
