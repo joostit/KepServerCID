@@ -741,6 +741,6 @@ namespace CidaRefImplCsharp
     } // class MemInterface
 
     // *************************************************************************************
-    
+
 
 } //namespace CidaRefImplCsharp
