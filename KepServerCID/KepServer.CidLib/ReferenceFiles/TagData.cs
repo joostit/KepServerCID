@@ -24,24 +24,12 @@ using WORD = System.UInt16;
 using DWORD = System.UInt32;
 using VALTYPE = System.UInt16;
 using BOOL = System.UInt16;
+using KepServer.CidLib.Types;
 
 namespace CidaRefImplCsharp
 {
 
-    // Using a local definition of FILETIME with unsigned members
-    [StructLayout(LayoutKind.Sequential), ComVisible(false)]
-    public struct FILETIME
-    {
-        public UInt32 dwLowDateTime;
-        public UInt32 dwHighDateTime;
-    }
-
-    public enum AccessType
-    {
-        READONLY = 0,
-        READWRITE,
-        WRITEONLY
-    }
+    
 
     // *************************************************************************************
     public class TagData
@@ -90,7 +78,7 @@ namespace CidaRefImplCsharp
         public WORD status = 0;
         public DWORD errorCode = 0;
         public WORD quality = TagData.OPC_QUALITY_BAD_OUT_OF_SERVICE;
-        public FILETIME timeStamp = new FILETIME();
+        public FileTime timeStamp = new FileTime();
         public Value value;
         private MemInterface memInterface;
 

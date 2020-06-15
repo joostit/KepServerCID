@@ -30,12 +30,11 @@ namespace CidaRefImplCsharp
         private IntPtr hMem = new IntPtr(0);
 
         // Pointer to mapped shared memory
-        public static unsafe byte* pMem = null;
-
-        string msg = "";
+        public unsafe byte* pMem = null;
 
         // Name based on product name for shared objects.
-        public static string memName;
+        private string memName;
+
 
         ~SharedMemServer()
         {

@@ -18,10 +18,11 @@ using System.IO;
 using WORD = System.UInt16;
 using DWORD = System.UInt32;
 using VALTYPE = System.UInt16;
+using KepServer.CidLib.Types;
 
 namespace CidaRefImplCsharp
 {
-    public class Register
+    public static class Register
     {
         public const int READ_OFFSET = 0;
         public const int WRITE_OFFSET = 4;
@@ -182,7 +183,7 @@ namespace CidaRefImplCsharp
         }
 
         // *************************************************************************************
-        public static void SetReadResponse(UnmanagedMemoryStream s, long memOffset, Value value, bool error, DWORD errorCode, WORD quality, FILETIME timeStamp)
+        public static void SetReadResponse(UnmanagedMemoryStream s, long memOffset, Value value, bool error, DWORD errorCode, WORD quality, FileTime timeStamp)
         {
             if (GetRegisterReadOffset(s, memOffset) != 0)
             {
@@ -192,7 +193,7 @@ namespace CidaRefImplCsharp
         }
 
         // *************************************************************************************
-        public static int SetReadResponseData(UnmanagedMemoryStream s, long memOffset, Value value, bool error, DWORD errorCode, WORD quality, FILETIME timeStamp)
+        public static int SetReadResponseData(UnmanagedMemoryStream s, long memOffset, Value value, bool error, DWORD errorCode, WORD quality, FileTime timeStamp)
         {
             VALTYPE tType = GetDataValueType(s, memOffset);
             if (!Value.IsValidValueType(tType))
@@ -217,7 +218,7 @@ namespace CidaRefImplCsharp
 
 
         // *************************************************************************************
-        public static void SetWriteResponse(UnmanagedMemoryStream s, long memOffset, bool error, DWORD errorCode, WORD quality, FILETIME timeStamp)
+        public static void SetWriteResponse(UnmanagedMemoryStream s, long memOffset, bool error, DWORD errorCode, WORD quality, FileTime timeStamp)
         {
             if (GetRegisterWriteOffset(s, memOffset) != 0)
             {
@@ -227,7 +228,7 @@ namespace CidaRefImplCsharp
         }
 
         // *************************************************************************************
-        public static int SetWriteResponseData(UnmanagedMemoryStream s, long memOffset, bool error, DWORD errorCode, WORD quality, FILETIME timeStamp)
+        public static int SetWriteResponseData(UnmanagedMemoryStream s, long memOffset, bool error, DWORD errorCode, WORD quality, FileTime timeStamp)
         {
             VALTYPE tType = GetDataValueType(s, memOffset);
             if (!Value.IsValidValueType(tType))
@@ -354,7 +355,7 @@ namespace CidaRefImplCsharp
         }
 
         // *************************************************************************************
-        static public int GetWriteRequest(UnmanagedMemoryStream s, long memOffset, ref Value value, ref WORD quality, ref FILETIME timeStamp)
+        static public int GetWriteRequest(UnmanagedMemoryStream s, long memOffset, ref Value value, ref WORD quality, ref FileTime timeStamp)
         {
             if (GetRegisterWriteOffset(s, memOffset) == 0)
             {
@@ -367,7 +368,7 @@ namespace CidaRefImplCsharp
         }
 
         // *************************************************************************************
-        static public int GetWriteRequestData(UnmanagedMemoryStream s, long memOffset, ref Value value, ref WORD quality, ref FILETIME timeStamp)
+        static public int GetWriteRequestData(UnmanagedMemoryStream s, long memOffset, ref Value value, ref WORD quality, ref FileTime timeStamp)
         {
 
             VALTYPE tType = GetDataValueType(s, memOffset);
@@ -478,7 +479,7 @@ namespace CidaRefImplCsharp
         }
 
         // *************************************************************************************
-        public static void SetDataTimestamp(UnmanagedMemoryStream s, long memOffset, FILETIME timeStamp)
+        public static void SetDataTimestamp(UnmanagedMemoryStream s, long memOffset, FileTime timeStamp)
         {
             BinaryWriter w = new BinaryWriter(s);
             w.BaseStream.Seek(memOffset + DATA_TIMESTAMP_OFFSET, SeekOrigin.Begin);
@@ -488,9 +489,9 @@ namespace CidaRefImplCsharp
         }
 
         // *************************************************************************************
-        public static FILETIME GetDataTimestamp(UnmanagedMemoryStream s, long memOffset)
+        public static FileTime GetDataTimestamp(UnmanagedMemoryStream s, long memOffset)
         {
-            FILETIME ft;
+            FileTime ft;
             BinaryReader r = new BinaryReader(s);
             r.BaseStream.Seek(memOffset + DATA_TIMESTAMP_OFFSET, SeekOrigin.Begin);
             ft.dwLowDateTime = (DWORD)r.ReadDouble();

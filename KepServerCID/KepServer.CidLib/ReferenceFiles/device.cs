@@ -20,6 +20,7 @@ using System.Runtime.InteropServices;
 
 using WORD = System.UInt16;
 using DWORD = System.UInt32;
+using KepServer.CidLib.Types;
 
 namespace CidaRefImplCsharp
 {
@@ -38,25 +39,7 @@ namespace CidaRefImplCsharp
         public static int nextTagIndex;		// Next tag to provide to GetNextTag
 
         // *************************************************************************************
-        public struct DEVICEENTRY
-        {
-            public string strName;
-            public string strID;
-            public List<Tag.TAGENTRY> tagEntryList;
-
-            // *************************************************************************************
-            public DEVICEENTRY(string _strName, string _strID)
-            {
-                strName = _strName;
-                strID = _strID;
-                tagEntryList = null;
-            }
-
-        } // public struct DEVICEENTRY 
-
-
-        // *************************************************************************************
-        public Device(DEVICEENTRY tDeviceEntry, MemInterface memInterface)
+        public Device(DeviceEntry tDeviceEntry, MemInterface memInterface)
         {
             this.memInterface = memInterface;
             devName = tDeviceEntry.strName;
@@ -127,7 +110,7 @@ namespace CidaRefImplCsharp
         }
 
         //**************************************************************
-        public DWORD AddTag(Tag.TAGENTRY tTagEntry, DWORD relativeOffset)
+        public DWORD AddTag(TagEntry tTagEntry, DWORD relativeOffset)
         {
             DWORD readOffset = 0;
             DWORD writeOffset = 0;
@@ -341,6 +324,7 @@ namespace CidaRefImplCsharp
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern int GetTickCount();
 
+     
     } // class Device
 
 } // namespace CidaRefImplCsharp

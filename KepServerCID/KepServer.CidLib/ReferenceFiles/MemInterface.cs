@@ -34,6 +34,7 @@ using System.Threading;
 using WORD = System.UInt16;
 using DWORD = System.UInt32;
 using KepServer.CidLib;
+using KepServer.CidLib.Types;
 
 // common namespace for related files in project
 namespace CidaRefImplCsharp
@@ -46,11 +47,11 @@ namespace CidaRefImplCsharp
 
         // Define the devices that we will use.
         // For test purposes, you may comment out a device you do not wish to create.
-        public Device.DEVICEENTRY[] DeviceTable =
+        public DeviceEntry[] DeviceTable =
             {
             //                         Name,				ID
-			new Device.DEVICEENTRY ("Device1",              "1"),
-            new Device.DEVICEENTRY ("MotionController1",    "192.168.1.10"),
+			new DeviceEntry ("Device1",              "1"),
+            new DeviceEntry ("MotionController1",    "192.168.1.10"),
             };
 
         // List of devices
@@ -58,13 +59,13 @@ namespace CidaRefImplCsharp
         public int nextDeviceIndex;      // Next device to provide to GetNextTag
 
         // Tag list for each device
-        public List<Tag.TAGENTRY>[] tagEntryList;
+        public List<TagEntry>[] tagEntryList;
 
         // shared memory class and related stream
-        public SharedMemServer refSharedMemory = new SharedMemServer();
+        public SharedMemServer sharedMemoryServer = new SharedMemServer();
         public UnmanagedMemoryStream memStream;
 
-        //CSharp mutex handling
+        // CSharp mutex handling
         // Create a security object that grants no access.
         public MutexSecurity mSec = new MutexSecurity();
 
@@ -82,7 +83,7 @@ namespace CidaRefImplCsharp
             SetupMutex(strConfigName);
 
             // Open the Shared Memory File with a name 
-            refSharedMemory.Open(strConfigName);
+            sharedMemoryServer.Open(strConfigName);
 
             // Load the TAGENTRY lists for each device.
             // A device may have no tags defined at startup.
@@ -113,9 +114,9 @@ namespace CidaRefImplCsharp
             memStream.Close();
 
             //release shared mem
-            if (!refSharedMemory.Root.Equals(null))
+            if (!sharedMemoryServer.Root.Equals(null))
             {
-                refSharedMemory.Dispose();
+                sharedMemoryServer.Dispose();
             }
 
         } // Start
@@ -126,40 +127,40 @@ namespace CidaRefImplCsharp
             int deviceNum;
             //match the tags to the devices in your device table
 
-            tagEntryList = new List<Tag.TAGENTRY>[DeviceTable.Count()];
+            tagEntryList = new List<TagEntry>[DeviceTable.Count()];
 
             deviceNum = 0; // device 1 (zero-based)
             if (deviceNum >= 0 && deviceNum < DeviceTable.Count())
             {
 
                 //always instantiate the TAGENTRY list
-                tagEntryList[deviceNum] = new List<Tag.TAGENTRY>();
+                tagEntryList[deviceNum] = new List<TagEntry>();
 
                 // For test purposes, you may comment out all tags you do not wish to create
                 //												Name,			StringSize,	ArrayRows,	ArrayCols,          Datatype,		                ReadWrite,			         Description,			    Group
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("BoolTag", 0, 0, 0, Value.T_BOOL, AccessType.READWRITE, "Example boolean tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("CharTag", 0, 0, 0, Value.T_CHAR, AccessType.READWRITE, "Example signed 8 bit tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("ByteTag", 0, 0, 0, Value.T_BYTE, AccessType.READWRITE, "Example unsigned 8 bit tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("ShortTag", 0, 0, 0, Value.T_SHORT, AccessType.READWRITE, "Example signed 16-bit tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("WordTag", 0, 0, 0, Value.T_WORD, AccessType.READWRITE, "Example unsigned 16-bit tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("LongTag", 0, 0, 0, Value.T_LONG, AccessType.READWRITE, "Example signed 32-bit tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("DWordTag", 0, 0, 0, Value.T_DWORD, AccessType.READWRITE, "Example unsigned 32-bit tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("FloatTag", 0, 0, 0, Value.T_FLOAT, AccessType.READWRITE, "Example 32-bit float tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("DoubleTag", 0, 0, 0, Value.T_DOUBLE, AccessType.READWRITE, "Example double 64-bit tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("DateTag", 0, 0, 0, Value.T_DATE, AccessType.READWRITE, "Example date tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("StringTag", 15, 0, 0, Value.T_STRING, AccessType.READWRITE, "Example string tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("ReadOnlyStringTag", 15, 0, 0, Value.T_STRING, AccessType.READONLY, "Example read-only string tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("BoolArray", 0, 1, 5, Value.T_BOOL | Value.T_ARRAY, AccessType.READWRITE, "Example bool array tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("CharArray", 0, 2, 5, Value.T_CHAR | Value.T_ARRAY, AccessType.READWRITE, "Example char array tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("ByteArray", 0, 2, 5, Value.T_BYTE | Value.T_ARRAY, AccessType.READWRITE, "Example byte array tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("ShortArray", 0, 2, 5, Value.T_SHORT | Value.T_ARRAY, AccessType.READWRITE, "Example short array tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("WordArray", 0, 2, 5, Value.T_WORD | Value.T_ARRAY, AccessType.READWRITE, "Example word array tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("LongArray", 0, 2, 5, Value.T_LONG | Value.T_ARRAY, AccessType.READWRITE, "Example long array tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("DWordArray", 0, 2, 5, Value.T_DWORD | Value.T_ARRAY, AccessType.READWRITE, "Example dword array tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("FloatArray", 0, 1, 5, Value.T_FLOAT | Value.T_ARRAY, AccessType.READWRITE, "Example float array tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("DoubleArray", 0, 1, 5, Value.T_DOUBLE | Value.T_ARRAY, AccessType.READWRITE, "Example double array tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("DateArray", 0, 1, 5, Value.T_DATE | Value.T_ARRAY, AccessType.READWRITE, "Example date array tag", ""));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("StringArray", 15, 1, 5, Value.T_STRING | Value.T_ARRAY, AccessType.READWRITE, "Example string array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("BoolTag", 0, 0, 0, Value.T_BOOL, AccessType.READWRITE, "Example boolean tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("CharTag", 0, 0, 0, Value.T_CHAR, AccessType.READWRITE, "Example signed 8 bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("ByteTag", 0, 0, 0, Value.T_BYTE, AccessType.READWRITE, "Example unsigned 8 bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("ShortTag", 0, 0, 0, Value.T_SHORT, AccessType.READWRITE, "Example signed 16-bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("WordTag", 0, 0, 0, Value.T_WORD, AccessType.READWRITE, "Example unsigned 16-bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("LongTag", 0, 0, 0, Value.T_LONG, AccessType.READWRITE, "Example signed 32-bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("DWordTag", 0, 0, 0, Value.T_DWORD, AccessType.READWRITE, "Example unsigned 32-bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("FloatTag", 0, 0, 0, Value.T_FLOAT, AccessType.READWRITE, "Example 32-bit float tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("DoubleTag", 0, 0, 0, Value.T_DOUBLE, AccessType.READWRITE, "Example double 64-bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("DateTag", 0, 0, 0, Value.T_DATE, AccessType.READWRITE, "Example date tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("StringTag", 15, 0, 0, Value.T_STRING, AccessType.READWRITE, "Example string tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("ReadOnlyStringTag", 15, 0, 0, Value.T_STRING, AccessType.READONLY, "Example read-only string tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("BoolArray", 0, 1, 5, Value.T_BOOL | Value.T_ARRAY, AccessType.READWRITE, "Example bool array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("CharArray", 0, 2, 5, Value.T_CHAR | Value.T_ARRAY, AccessType.READWRITE, "Example char array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("ByteArray", 0, 2, 5, Value.T_BYTE | Value.T_ARRAY, AccessType.READWRITE, "Example byte array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("ShortArray", 0, 2, 5, Value.T_SHORT | Value.T_ARRAY, AccessType.READWRITE, "Example short array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("WordArray", 0, 2, 5, Value.T_WORD | Value.T_ARRAY, AccessType.READWRITE, "Example word array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("LongArray", 0, 2, 5, Value.T_LONG | Value.T_ARRAY, AccessType.READWRITE, "Example long array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("DWordArray", 0, 2, 5, Value.T_DWORD | Value.T_ARRAY, AccessType.READWRITE, "Example dword array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("FloatArray", 0, 1, 5, Value.T_FLOAT | Value.T_ARRAY, AccessType.READWRITE, "Example float array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("DoubleArray", 0, 1, 5, Value.T_DOUBLE | Value.T_ARRAY, AccessType.READWRITE, "Example double array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("DateArray", 0, 1, 5, Value.T_DATE | Value.T_ARRAY, AccessType.READWRITE, "Example date array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("StringArray", 15, 1, 5, Value.T_STRING | Value.T_ARRAY, AccessType.READWRITE, "Example string array tag", ""));
 
                 //always assign the device TAGENTRY list
                 DeviceTable[deviceNum].tagEntryList = tagEntryList[deviceNum];
@@ -170,13 +171,13 @@ namespace CidaRefImplCsharp
             {
 
                 //always instantiate the TAGENTRY list
-                tagEntryList[deviceNum] = new List<Tag.TAGENTRY>();
+                tagEntryList[deviceNum] = new List<TagEntry>();
 
                 // For test purposes, you may comment out all tags you do not wish to create
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("FaultString", 100, 0, 0, Value.T_STRING, AccessType.READONLY, "", "X Axis\\Status"));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("ServoStatus", 0, 0, 0, Value.T_DWORD, AccessType.READONLY, "", "X Axis\\Status"));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("Position", 0, 0, 0, Value.T_FLOAT, AccessType.READWRITE, "", "X Axis"));
-                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("Acceleration", 0, 1, 5, Value.T_FLOAT, AccessType.READONLY, "", "X Axis"));
+                tagEntryList[deviceNum].Add(new TagEntry("FaultString", 100, 0, 0, Value.T_STRING, AccessType.READONLY, "", "X Axis\\Status"));
+                tagEntryList[deviceNum].Add(new TagEntry("ServoStatus", 0, 0, 0, Value.T_DWORD, AccessType.READONLY, "", "X Axis\\Status"));
+                tagEntryList[deviceNum].Add(new TagEntry("Position", 0, 0, 0, Value.T_FLOAT, AccessType.READWRITE, "", "X Axis"));
+                tagEntryList[deviceNum].Add(new TagEntry("Acceleration", 0, 1, 5, Value.T_FLOAT, AccessType.READONLY, "", "X Axis"));
 
                 //always assign the device TAGENTRY list
                 DeviceTable[deviceNum].tagEntryList = tagEntryList[deviceNum];
@@ -188,10 +189,10 @@ namespace CidaRefImplCsharp
         public void LoadTables()
         {
             // If Shared Memory File opened successfully, go on to define our registers
-            if (refSharedMemory.IsOpen())
+            if (sharedMemoryServer.IsOpen())
             {
 
-                byte* sharedMemPtr = (byte*)refSharedMemory.Root.ToPointer();
+                byte* sharedMemPtr = (byte*)sharedMemoryServer.Root.ToPointer();
 
                 // Create an UnmanagedMemoryStream object using a pointer to unmanaged memory.
                 memStream = new UnmanagedMemoryStream(sharedMemPtr, maxSharedMemSize, maxSharedMemSize, FileAccess.ReadWrite);
@@ -200,7 +201,7 @@ namespace CidaRefImplCsharp
                 // This will eliminate the need to repeatedly lock/unlock, causing unnecessary CPU operations.
                 if (mutex.WaitOne() == true)
                 {
-                    byte* pSharedMemoryBaseMem = SharedMemServer.pMem; //new mutex testing
+                    byte* pSharedMemoryBaseMem = sharedMemoryServer.pMem; //new mutex testing
 
                     // Walk device table
                     int nDeviceTableIndex = 0;
@@ -210,7 +211,7 @@ namespace CidaRefImplCsharp
                     while (nDeviceTableIndex < DeviceTable.Length)
                     {
                         // Create new Device
-                        Device device = new Device((Device.DEVICEENTRY)DeviceTable[nDeviceTableIndex], this);
+                        Device device = new Device((DeviceEntry)DeviceTable[nDeviceTableIndex], this);
 
                         if (device.Equals(null))
                         {
@@ -237,7 +238,7 @@ namespace CidaRefImplCsharp
                         // Add device to device set
                         deviceSet.Add(device);
 
-                        foreach (Tag.TAGENTRY tagEntry in DeviceTable[nDeviceTableIndex].tagEntryList)
+                        foreach (TagEntry tagEntry in DeviceTable[nDeviceTableIndex].tagEntryList)
                         {
                             nextAvailableTagOffset = device.AddTag(tagEntry, nextAvailableTagOffset);
                         }
@@ -277,7 +278,7 @@ namespace CidaRefImplCsharp
             int nRC = TagData.SMRC_NO_ERROR;
             byte* pSharedMemoryBaseMem = null;
             Tag refTag = null;
-            string msg = "";
+
             int lockCount = 0;
 
             while (true)
@@ -337,7 +338,7 @@ namespace CidaRefImplCsharp
 
                         if (mutex.WaitOne() == true) //if we lock
                         {
-                            pSharedMemoryBaseMem = SharedMemServer.pMem;
+                            pSharedMemoryBaseMem = sharedMemoryServer.pMem;
                         }
 
                         // Process responses only if we have access to Shared Memory (valid pointer)
@@ -436,7 +437,7 @@ namespace CidaRefImplCsharp
                             if (mutex.WaitOne() == true)
                             {
                                 lockCount++;
-                                pSharedMemoryBaseMem = SharedMemServer.pMem;
+                                pSharedMemoryBaseMem = sharedMemoryServer.pMem;
                             }
                         }
                         catch (AbandonedMutexException ex)
@@ -731,7 +732,7 @@ namespace CidaRefImplCsharp
         } // public static Tag GetNextTag ()
 
         // *************************************************************************************
-        public void GetFtNow(ref FILETIME ft)
+        public void GetFtNow(ref FileTime ft)
         {
             long hFT1 = DateTime.Now.ToFileTime();
             ft.dwLowDateTime = (UInt32)(hFT1 & 0xFFFFFFFF);
