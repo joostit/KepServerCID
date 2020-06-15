@@ -289,7 +289,8 @@ namespace CidaRefImplCsharp
                     //DateTime newSysNow = DateTime.Now;
                     //string tmpStr = "Seconds " + newSysNow.Second.ToString () + "." + newSysNow.Millisecond.ToString () + "      "; //padding
                     //this.valueString = tmpStr.Substring (0, tmpStr.Length > this.valueStringSize ? this.valueStringSize : tmpStr.Length);
-                    break;
+                    //throw new NotSupportedException("Incrementing a string is not supported");
+
 
                 default:
                     if ((WORD)(this.valueType & T_ARRAY) == T_ARRAY)
@@ -566,7 +567,7 @@ namespace CidaRefImplCsharp
                 case T_DATE:
                     //writing to date not currently supported
                     //this.valueDate = BitConverter.ToInt64 (a8byte, 0);
-                    break;
+                    throw new NotSupportedException("writing to date not currently supported");
 
                 case T_STRING:
                     {
@@ -676,7 +677,7 @@ namespace CidaRefImplCsharp
                                             //Array.Copy (this.valueExtByteArray, offset, aBits, 0, aBits.Length);
                                             //this.valueDynamicArray.SetValue (BitConverter.ToDouble (aBits, 0), i, j);
                                             //offset += sizeof (Int64);
-                                            break;
+                                            throw new NotSupportedException("writing to date not currently supported");
                                         }
                                     case T_STRING:
                                         {
