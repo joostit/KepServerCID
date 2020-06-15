@@ -28,7 +28,8 @@ namespace CidaRefImplCsharp
             GetConfigInfo(ref strConfigName, ref strApplicationDir, args, ref exportConfig);
 
             // Start the interface to shared memory
-            MemInterface.Start(args, strConfigName, strApplicationDir, exportConfig);
+            MemInterface memInterface = new MemInterface();
+            memInterface.Start(args, strConfigName, strApplicationDir, exportConfig);
 
         } //Main ()
 

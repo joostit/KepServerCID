@@ -5,12 +5,21 @@ using System.Text;
 
 namespace KepServer.CidLib
 {
-    public class QuitThread
+    internal class QuitThread
     {
+        private MemInterface memInterface;
+
+
+        public QuitThread(MemInterface memInterface)
+        {
+            this.memInterface = memInterface;
+        }
 
         //This is the thread to loop and react to user pressing 'q' to quit 
         public void RuntimeThreadProc()
         {
+
+
             ConsoleKeyInfo cki;
             Console.TreatControlCAsInput = true;
             bool doContinue = true;
@@ -25,7 +34,7 @@ namespace KepServer.CidLib
                 else
                 {
                     //write something to main thread global to exit
-                    MemInterface.exitFlag = true;
+                    memInterface.exitFlag = true;
                     doContinue = false;
                 }
             }

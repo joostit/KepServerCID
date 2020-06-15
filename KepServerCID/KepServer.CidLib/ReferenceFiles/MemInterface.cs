@@ -41,12 +41,12 @@ namespace CidaRefImplCsharp
 
     // This application uses a pointer to unmanaged (shared) memory.
     // You must enable "Allow unsafe code" in project build properties.
-    unsafe class MemInterface
+    public unsafe class MemInterface
     {
 
         // Define the devices that we will use.
         // For test purposes, you may comment out a device you do not wish to create.
-        public static Device.DEVICEENTRY[] DeviceTable =
+        public Device.DEVICEENTRY[] DeviceTable =
             {
             //                         Name,				ID
 			new Device.DEVICEENTRY ("Device1",              "1"),
@@ -54,29 +54,29 @@ namespace CidaRefImplCsharp
             };
 
         // List of devices
-        public static List<Device> deviceSet = new List<Device>();
-        public static int nextDeviceIndex;      // Next device to provide to GetNextTag
+        public List<Device> deviceSet = new List<Device>();
+        public int nextDeviceIndex;      // Next device to provide to GetNextTag
 
         // Tag list for each device
-        public static List<Tag.TAGENTRY>[] tagEntryList = new List<Tag.TAGENTRY>[DeviceTable.Count()];
+        public List<Tag.TAGENTRY>[] tagEntryList;
 
         // shared memory class and related stream
-        public static SharedMemServer refSharedMemory = new SharedMemServer();
-        public static UnmanagedMemoryStream memStream;
+        public SharedMemServer refSharedMemory = new SharedMemServer();
+        public UnmanagedMemoryStream memStream;
 
         //CSharp mutex handling
         // Create a security object that grants no access.
-        public static MutexSecurity mSec = new MutexSecurity();
+        public MutexSecurity mSec = new MutexSecurity();
 
-        public static Mutex mutex = null;
+        public Mutex mutex = null;
 
         static DWORD sharedMemorySize;
         static int maxSharedMemSize = SharedMemServer.MAPSIZE;
-        public static bool exitFlag = false;
+        public bool exitFlag = false;
 
 
         // *************************************************************************************
-        public static void Start(string[] args, string strConfigName, string strApplicationDir, bool exportConfig)
+        public void Start(string[] args, string strConfigName, string strApplicationDir, bool exportConfig)
         {
             //Set up a mutex to control access to shared memory
             SetupMutex(strConfigName);
@@ -121,10 +121,12 @@ namespace CidaRefImplCsharp
         } // Start
 
         // *************************************************************************************
-        public static void LoadTagEntryLists()
+        public void LoadTagEntryLists()
         {
             int deviceNum;
             //match the tags to the devices in your device table
+
+            tagEntryList = new List<Tag.TAGENTRY>[DeviceTable.Count()];
 
             deviceNum = 0; // device 1 (zero-based)
             if (deviceNum >= 0 && deviceNum < DeviceTable.Count())
@@ -183,7 +185,7 @@ namespace CidaRefImplCsharp
         } // LoadTagEntryLists ()
 
         // *************************************************************************************
-        public static void LoadTables()
+        public void LoadTables()
         {
             // If Shared Memory File opened successfully, go on to define our registers
             if (refSharedMemory.IsOpen())
@@ -208,7 +210,7 @@ namespace CidaRefImplCsharp
                     while (nDeviceTableIndex < DeviceTable.Length)
                     {
                         // Create new Device
-                        Device device = new Device((Device.DEVICEENTRY)DeviceTable[nDeviceTableIndex]);
+                        Device device = new Device((Device.DEVICEENTRY)DeviceTable[nDeviceTableIndex], this);
 
                         if (device.Equals(null))
                         {
@@ -261,7 +263,7 @@ namespace CidaRefImplCsharp
 
 
         // *************************************************************************************
-        public static void mainLoop()
+        public void mainLoop()
         {
             if (exitFlag == true) // may be set after exporting config
             {
@@ -537,7 +539,7 @@ namespace CidaRefImplCsharp
 
 
         // *************************************************************************************
-        public static void StartExportConfiguration(string strApplicationDir, string strConfigName)
+        public void StartExportConfiguration(string strApplicationDir, string strConfigName)
         {
             // Create a configuration file in the application's directory
             string strConfigFile = strApplicationDir;
@@ -573,7 +575,7 @@ namespace CidaRefImplCsharp
 
 
         // *************************************************************************************
-        public static void ExportConfiguration(string strConfigFile, string strConfigName)
+        public void ExportConfiguration(string strConfigFile, string strConfigName)
         {
             // Create the Configuration File in XML format
 
@@ -623,7 +625,7 @@ namespace CidaRefImplCsharp
 
 
         // *************************************************************************************
-        public static void SetupMutex(string strConfigName)
+        public void SetupMutex(string strConfigName)
         {
             //Set up a mutex to control access to shared memory
             // The value of this variable is set by the mutex
@@ -675,9 +677,9 @@ namespace CidaRefImplCsharp
 
 
         // *************************************************************************************
-        public static void StartQuitThread()
+        public void StartQuitThread()
         {
-            QuitThread quitThreadClass = new QuitThread();
+            QuitThread quitThreadClass = new QuitThread(this);
             Thread quitThread = new Thread(quitThreadClass.RuntimeThreadProc);
             quitThread.Name = "Quit_Loop";
             quitThread.Start();
@@ -688,7 +690,7 @@ namespace CidaRefImplCsharp
         // Purpose: Provide caller with the next tag to work with.  Next tag is based
         // on order of the tag set within each device set, which is also ordered.
         // **************************************************************************
-        public static Tag GetNextTag()
+        public Tag GetNextTag()
         {
 
             // Look for empty set
@@ -729,7 +731,7 @@ namespace CidaRefImplCsharp
         } // public static Tag GetNextTag ()
 
         // *************************************************************************************
-        public static void GetFtNow(ref FILETIME ft)
+        public void GetFtNow(ref FILETIME ft)
         {
             long hFT1 = DateTime.Now.ToFileTime();
             ft.dwLowDateTime = (UInt32)(hFT1 & 0xFFFFFFFF);
