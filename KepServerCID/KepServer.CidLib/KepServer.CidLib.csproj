@@ -9,10 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ReferenceFiles\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="System.Threading.AccessControl" Version="4.7.0" />
   </ItemGroup>
 

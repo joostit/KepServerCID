@@ -9,7 +9,9 @@ namespace KepServer.Cid.CidTester
         {
             Console.WriteLine("Started");
 
-            CidConnector.Run(args);
+            CidConnector connector = new CidConnector();
+
+            connector.Run(args);
 
         }
     }

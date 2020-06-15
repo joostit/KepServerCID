@@ -1,0 +1,744 @@
+﻿// **************************************************************************
+// File:  interface.cs
+// Created:  11/30/2009 Copyright (c) 2009
+//
+// Description:  Based on command line argument, this will initiate configuration
+// export or initialize and start the shared memory server.
+//
+// At least one device entry must be defined in the DeviceTable array. Tags
+// are usually defined at compile time. However, devices may be created with
+// no tags for applications that will dynamically create tags at runtime.
+//
+// Shared memory is configured at startup only for devices with defined tags.
+// An application that creates tags dynamically would have to release, close,
+// and regenerate shared memory. Any application with a reference to shared
+// memory, such as KEPServer runtime, would need to stop and release the reference
+// before shared memory could be closed.
+//
+// **************************************************************************
+
+// class library references
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Security.AccessControl;
+using System.Security.Principal;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Threading;
+
+// C# equivalent of aliasing for readability
+using WORD = System.UInt16;
+using DWORD = System.UInt32;
+using KepServer.CidLib;
+
+// common namespace for related files in project
+namespace CidaRefImplCsharp
+{
+
+    // This application uses a pointer to unmanaged (shared) memory.
+    // You must enable "Allow unsafe code" in project build properties.
+    unsafe class MemInterface
+    {
+
+        // Define the devices that we will use.
+        // For test purposes, you may comment out a device you do not wish to create.
+        public static Device.DEVICEENTRY[] DeviceTable =
+            {
+            //                         Name,				ID
+			new Device.DEVICEENTRY ("Device1",              "1"),
+            new Device.DEVICEENTRY ("MotionController1",    "192.168.1.10"),
+            };
+
+        // List of devices
+        public static List<Device> deviceSet = new List<Device>();
+        public static int nextDeviceIndex;      // Next device to provide to GetNextTag
+
+        // Tag list for each device
+        public static List<Tag.TAGENTRY>[] tagEntryList = new List<Tag.TAGENTRY>[DeviceTable.Count()];
+
+        // shared memory class and related stream
+        public static SharedMemServer refSharedMemory = new SharedMemServer();
+        public static UnmanagedMemoryStream memStream;
+
+        //CSharp mutex handling
+        // Create a security object that grants no access.
+        public static MutexSecurity mSec = new MutexSecurity();
+
+        public static Mutex mutex = null;
+
+        static DWORD sharedMemorySize;
+        static int maxSharedMemSize = SharedMemServer.MAPSIZE;
+        public static bool exitFlag = false;
+
+
+        // *************************************************************************************
+        public static void Start(string[] args, string strConfigName, string strApplicationDir, bool exportConfig)
+        {
+            //Set up a mutex to control access to shared memory
+            SetupMutex(strConfigName);
+
+            // Open the Shared Memory File with a name 
+            refSharedMemory.Open(strConfigName);
+
+            // Load the TAGENTRY lists for each device.
+            // A device may have no tags defined at startup.
+            // At startup, shared memory is configured only for defined tags.
+            LoadTagEntryLists();
+
+            // Load the device and tag tables into lists to initialize shared memory
+            LoadTables();
+
+            // Are we exporting the configuration or running a shared memory server?
+            if (exportConfig == true)
+            {
+                StartExportConfiguration(strApplicationDir, strConfigName);
+            }
+
+            else
+            {
+                //The main process thread will enter an infinite loop until signaled to break.
+                //We need a thread to monitor the keyboard for the user signaling to quit.
+                //Set up and start the thread
+                StartQuitThread();
+
+                // Enter the main processing loop. Return when user signals quit.
+                mainLoop();
+            }
+            // User signaled quit
+            // Close the stream.
+            memStream.Close();
+
+            //release shared mem
+            if (!refSharedMemory.Root.Equals(null))
+            {
+                refSharedMemory.Dispose();
+            }
+
+        } // Start
+
+        // *************************************************************************************
+        public static void LoadTagEntryLists()
+        {
+            int deviceNum;
+            //match the tags to the devices in your device table
+
+            deviceNum = 0; // device 1 (zero-based)
+            if (deviceNum >= 0 && deviceNum < DeviceTable.Count())
+            {
+
+                //always instantiate the TAGENTRY list
+                tagEntryList[deviceNum] = new List<Tag.TAGENTRY>();
+
+                // For test purposes, you may comment out all tags you do not wish to create
+                //												Name,			StringSize,	ArrayRows,	ArrayCols,          Datatype,		                ReadWrite,			         Description,			    Group
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("BoolTag", 0, 0, 0, Value.T_BOOL, AccessType.READWRITE, "Example boolean tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("CharTag", 0, 0, 0, Value.T_CHAR, AccessType.READWRITE, "Example signed 8 bit tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("ByteTag", 0, 0, 0, Value.T_BYTE, AccessType.READWRITE, "Example unsigned 8 bit tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("ShortTag", 0, 0, 0, Value.T_SHORT, AccessType.READWRITE, "Example signed 16-bit tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("WordTag", 0, 0, 0, Value.T_WORD, AccessType.READWRITE, "Example unsigned 16-bit tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("LongTag", 0, 0, 0, Value.T_LONG, AccessType.READWRITE, "Example signed 32-bit tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("DWordTag", 0, 0, 0, Value.T_DWORD, AccessType.READWRITE, "Example unsigned 32-bit tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("FloatTag", 0, 0, 0, Value.T_FLOAT, AccessType.READWRITE, "Example 32-bit float tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("DoubleTag", 0, 0, 0, Value.T_DOUBLE, AccessType.READWRITE, "Example double 64-bit tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("DateTag", 0, 0, 0, Value.T_DATE, AccessType.READWRITE, "Example date tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("StringTag", 15, 0, 0, Value.T_STRING, AccessType.READWRITE, "Example string tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("ReadOnlyStringTag", 15, 0, 0, Value.T_STRING, AccessType.READONLY, "Example read-only string tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("BoolArray", 0, 1, 5, Value.T_BOOL | Value.T_ARRAY, AccessType.READWRITE, "Example bool array tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("CharArray", 0, 2, 5, Value.T_CHAR | Value.T_ARRAY, AccessType.READWRITE, "Example char array tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("ByteArray", 0, 2, 5, Value.T_BYTE | Value.T_ARRAY, AccessType.READWRITE, "Example byte array tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("ShortArray", 0, 2, 5, Value.T_SHORT | Value.T_ARRAY, AccessType.READWRITE, "Example short array tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("WordArray", 0, 2, 5, Value.T_WORD | Value.T_ARRAY, AccessType.READWRITE, "Example word array tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("LongArray", 0, 2, 5, Value.T_LONG | Value.T_ARRAY, AccessType.READWRITE, "Example long array tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("DWordArray", 0, 2, 5, Value.T_DWORD | Value.T_ARRAY, AccessType.READWRITE, "Example dword array tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("FloatArray", 0, 1, 5, Value.T_FLOAT | Value.T_ARRAY, AccessType.READWRITE, "Example float array tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("DoubleArray", 0, 1, 5, Value.T_DOUBLE | Value.T_ARRAY, AccessType.READWRITE, "Example double array tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("DateArray", 0, 1, 5, Value.T_DATE | Value.T_ARRAY, AccessType.READWRITE, "Example date array tag", ""));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("StringArray", 15, 1, 5, Value.T_STRING | Value.T_ARRAY, AccessType.READWRITE, "Example string array tag", ""));
+
+                //always assign the device TAGENTRY list
+                DeviceTable[deviceNum].tagEntryList = tagEntryList[deviceNum];
+            }
+
+            deviceNum = 1; // device 2 (zero-based)
+            if (deviceNum >= 0 && deviceNum < DeviceTable.Count())
+            {
+
+                //always instantiate the TAGENTRY list
+                tagEntryList[deviceNum] = new List<Tag.TAGENTRY>();
+
+                // For test purposes, you may comment out all tags you do not wish to create
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("FaultString", 100, 0, 0, Value.T_STRING, AccessType.READONLY, "", "X Axis\\Status"));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("ServoStatus", 0, 0, 0, Value.T_DWORD, AccessType.READONLY, "", "X Axis\\Status"));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("Position", 0, 0, 0, Value.T_FLOAT, AccessType.READWRITE, "", "X Axis"));
+                tagEntryList[deviceNum].Add(new Tag.TAGENTRY("Acceleration", 0, 1, 5, Value.T_FLOAT, AccessType.READONLY, "", "X Axis"));
+
+                //always assign the device TAGENTRY list
+                DeviceTable[deviceNum].tagEntryList = tagEntryList[deviceNum];
+            }
+
+        } // LoadTagEntryLists ()
+
+        // *************************************************************************************
+        public static void LoadTables()
+        {
+            // If Shared Memory File opened successfully, go on to define our registers
+            if (refSharedMemory.IsOpen())
+            {
+
+                byte* sharedMemPtr = (byte*)refSharedMemory.Root.ToPointer();
+
+                // Create an UnmanagedMemoryStream object using a pointer to unmanaged memory.
+                memStream = new UnmanagedMemoryStream(sharedMemPtr, maxSharedMemSize, maxSharedMemSize, FileAccess.ReadWrite);
+
+                // Important: Get the lock once.  All Shared Memory Registers will be defined while we own this lock.
+                // This will eliminate the need to repeatedly lock/unlock, causing unnecessary CPU operations.
+                if (mutex.WaitOne() == true)
+                {
+                    byte* pSharedMemoryBaseMem = SharedMemServer.pMem; //new mutex testing
+
+                    // Walk device table
+                    int nDeviceTableIndex = 0;
+                    DWORD nextAvailableDeviceOffset = 0;
+                    DWORD nextAvailableTagOffset = 0;
+
+                    while (nDeviceTableIndex < DeviceTable.Length)
+                    {
+                        // Create new Device
+                        Device device = new Device((Device.DEVICEENTRY)DeviceTable[nDeviceTableIndex]);
+
+                        if (device.Equals(null))
+                        {
+                            break;
+                        }
+
+                        if (DeviceTable[nDeviceTableIndex].tagEntryList.Count() == 0)
+                        {
+                            ++nDeviceTableIndex;
+                            continue;
+                        }
+
+                        // Dynamically assign device's shared memory offset based on the previous device's allocation
+                        device.SetSharedMemoryOffset(nextAvailableDeviceOffset);
+                        Trace.WriteLine("Device " + device.GetName().ToString() +
+                            "offset within shared memory = " + device.GetSharedMemoryOffset().ToString());
+
+                        // Important: For this reference implementation, we will assign each device its offset within Shared Memory.
+                        // This means each tag's offset must be relative to it's device's offset.
+                        // In a commericial application you can choose to do it this way, or define all tag offsets relative to the 
+                        // beginning of Shared Memory.  In the latter case, all device offsets would be 0.
+                        nextAvailableTagOffset = 0;
+
+                        // Add device to device set
+                        deviceSet.Add(device);
+
+                        foreach (Tag.TAGENTRY tagEntry in DeviceTable[nDeviceTableIndex].tagEntryList)
+                        {
+                            nextAvailableTagOffset = device.AddTag(tagEntry, nextAvailableTagOffset);
+                        }
+
+                        nextAvailableDeviceOffset += nextAvailableTagOffset;
+                        ++nDeviceTableIndex;
+                    }
+                    // Size of the map is based on the last tag allocation for the last device allocation
+                    sharedMemorySize = nextAvailableDeviceOffset;
+
+                    // Release SharedMemory
+                    mutex.ReleaseMutex();
+                    pSharedMemoryBaseMem = null;
+
+                } // if (mutex.WaitOne () == true)
+                else
+                {
+                    System.Console.WriteLine("CRuntime.Initialize failed to acquirelock");
+                }
+            } //if (refSharedMemory.IsOpen ())
+
+        } // public static void LoadTables ()
+
+
+        // *************************************************************************************
+        public static void mainLoop()
+        {
+            if (exitFlag == true) // may be set after exporting config
+            {
+                return;
+            }
+
+            Console.WriteLine("CIDA C# Reference Implementation is currently running.");
+            Console.WriteLine("Press 'q' to quit");
+
+            // **** set up and enter the main scan loop ****
+            int nRC = TagData.SMRC_NO_ERROR;
+            byte* pSharedMemoryBaseMem = null;
+            Tag refTag = null;
+            string msg = "";
+            int lockCount = 0;
+
+            while (true)
+            {
+                // loop til signaled to quit
+                if (exitFlag == true) //the thread should set this
+                    break;
+
+                // refTag is assigned after Read/Write to "Device" and Process Read/Write Response (Shared Memory).
+                // The reason we don't assign the tag now is that we would need to lock Shared Memory to check for pending requests,
+                // unlock Shared Memory, read/write to "device", then lock Shared Memory again to set responses.  Locking
+                // and unlocking Shared Memory twice for every tag is not desirable.  The side effect is that once a tag is assigned
+                // we will need to wait one tick before we can perform the read/write.
+                if (refTag != null)
+                {
+                    // **************************
+                    // Read/Write to “Device”
+                    // **************************
+                    if (refTag.tagWriteRequestPending)
+                    {
+                        // Important: In a commercial application, this is where you would send the write request to the device.
+                        // Since data is simulated, the write response is immediately available.
+                        refTag.tagReadData.value = refTag.tagWriteData.value;       // assign value written to value to be read
+                        refTag.tagReadData.quality = refTag.tagWriteData.quality;
+                        refTag.tagReadData.timeStamp = refTag.tagWriteData.timeStamp;
+
+                        refTag.tagWriteData.errorCode = 0;
+                        refTag.tagWriteData.quality = TagData.OPC_QUALITY_GOOD_NON_SPECIFIC;
+                        GetFtNow(ref refTag.tagWriteData.timeStamp);
+
+                        refTag.tagWriteRequestPending = false;
+                        refTag.tagWriteResponsePending = true;
+                    }
+
+                    if (refTag.tagReadRequestPending)
+                    {
+                        // Important: In a commercial application, this is where you would send the read request to the device
+                        // Since data is simulated, the read response is immediately available.
+                        if (refTag.IsWriteable() == true)
+                        {
+                            refTag.tagReadData.value.Increment();   // For simulation purposes, bump current value
+                        }
+                        refTag.tagReadData.errorCode = 0;
+                        refTag.tagReadData.quality = TagData.OPC_QUALITY_GOOD_NON_SPECIFIC;
+                        GetFtNow(ref refTag.tagReadData.timeStamp);
+
+                        refTag.tagReadRequestPending = false;
+                        refTag.tagReadResponsePending = true;
+                    }
+
+                    // ********************************************
+                    // Process Read/Write Response (Shared Memory)
+                    // ********************************************
+                    if (refTag.tagWriteResponsePending == true || refTag.tagReadResponsePending == true)
+                    {
+                        Debug.Assert(pSharedMemoryBaseMem == null);
+
+                        if (mutex.WaitOne() == true) //if we lock
+                        {
+                            pSharedMemoryBaseMem = SharedMemServer.pMem;
+                        }
+
+                        // Process responses only if we have access to Shared Memory (valid pointer)
+                        if (pSharedMemoryBaseMem == null)
+                        {
+                            mutex.ReleaseMutex();
+                            continue;
+                        }
+
+                        if (refTag.tagWriteResponsePending)
+                        {
+
+                            // Get the write response pending flag so we can ASSERT that its not set.
+                            bool bWriteResponsePending = false;
+                            Register.GetWriteResponsePending(memStream, refTag.GetSharedMemoryOffset(), ref bWriteResponsePending);
+
+#if TRACE_SM_ACCESS
+                            msg = string.Format ("{0,8:0D}: Tag " +
+                                "{1,0:T}: GetWriteResponsePending nRC = " +
+                                    "{2,0:D}, bWriteResponsePending = {3,0:D}", Device.GetTickCount (), refTag.GetName (), nRC, bWriteResponsePending);
+                            Trace.WriteLine (msg);
+#endif//TRACE_SM_ACCESS
+
+                            if (nRC == TagData.SMRC_NO_ERROR)
+                            {
+                                // CID driver should not issue a write before completing the last write
+                                Debug.Assert(!bWriteResponsePending);
+                                Register.SetWriteResponse(memStream, refTag.GetSharedMemoryOffset(), refTag.tagWriteData.errorCode != 0, refTag.tagWriteData.errorCode, refTag.tagWriteData.quality, refTag.tagWriteData.timeStamp);
+
+#if TRACE_SM_ACCESS
+                                msg = string.Format ("{0,8:0D}: Tag " +
+                                    "{1,0:T}: SetWriteResponse nRC = " +
+                                        "{2,0:D}", Device.GetTickCount (), refTag.GetName (), nRC);
+                                Trace.WriteLine (msg);
+#endif//TRACE_SM_ACCESS
+                                if (nRC == TagData.SMRC_NO_ERROR)
+                                {
+                                    refTag.tagWriteResponsePending = false;
+                                }
+                            }
+                        } // if write response pending
+
+                        if (refTag.tagReadResponsePending == true)
+                        {
+                            // Get the read response pending flag so we can ASSERT that its not set.
+                            bool bReadResponsePending = false;
+
+                            Register.GetReadResponsePending(memStream, refTag.GetSharedMemoryOffset(), ref bReadResponsePending);
+
+#if TRACE_SM_ACCESS
+                            msg = string.Format ("{0,8:0D}: Tag " +
+                                "{1,0:T}: GetReadResponsePending nRC = " +
+                                    "{2,0:D}, bReadResponsePending = {3,0:D}", Device.GetTickCount (), refTag.GetName (), nRC, bReadResponsePending);
+                            Trace.WriteLine (msg);
+#endif//TRACE_SM_ACCESS
+
+                            if (nRC == TagData.SMRC_NO_ERROR)
+                            {
+                                // CID driver should not issue a read before completing the last read.
+                                Debug.Assert(!bReadResponsePending);
+                                Register.SetReadResponse(memStream, refTag.GetSharedMemoryOffset(), refTag.tagReadData.value, refTag.tagReadData.errorCode != 0, refTag.tagReadData.errorCode, refTag.tagReadData.quality, refTag.tagReadData.timeStamp);
+
+#if TRACE_SM_ACCESS
+                                msg = string.Format ("{0,8:0D}: Tag " +
+                                    "{1,0:T}: SetReadResponse nRC = " +
+                                        "{2,0:D}", Device.GetTickCount (), refTag.GetName (), nRC);
+                                Trace.WriteLine (msg);
+#endif//TRACE_SM_ACCESS
+
+                                if (nRC == TagData.SMRC_NO_ERROR)
+                                {
+                                    refTag.tagReadResponsePending = false;
+                                }
+                            }
+                        } // if read response pending
+                    } // if read or write responses are pending
+                } // if (refTag != null)
+
+                // Important: In a commercial application, you may not want to process one tag at a time as this reference implementation does.  Instead you would
+                // want to process as many tags as possible, processing requests and responses.
+
+                // Get our next tag to process.
+                refTag = GetNextTag();
+
+                if (refTag != null)
+                {
+                    // ********************************************
+                    // Process Read/Write Requests (Shared Memory)
+                    // ********************************************
+
+                    // May have been locked above
+                    if (pSharedMemoryBaseMem == null)
+                    {
+                        try
+                        {
+                            if (mutex.WaitOne() == true)
+                            {
+                                lockCount++;
+                                pSharedMemoryBaseMem = SharedMemServer.pMem;
+                            }
+                        }
+                        catch (AbandonedMutexException ex)
+                        {
+                            Console.WriteLine("Exception on return from WaitOne." +
+                                "\r\n\tMessage: {0}", ex.Message);
+                        }
+                    }
+                    // Process requests only if we have access to Shared Memory (valid pointer)
+                    if (pSharedMemoryBaseMem == null)
+                    {
+                        if (lockCount > 0)
+                        {
+                            mutex.ReleaseMutex();
+                            lockCount--;
+                        }
+                        continue;
+                    }
+
+                    // Check for pending write requests
+                    bool WriteRequestPending = false;
+                    nRC = Register.GetWriteRequestPending(memStream, refTag.GetSharedMemoryOffset(), ref WriteRequestPending);
+
+#if TRACE_SM_ACCESS
+                msg = string.Format ("{0,8:0D}: Tag " +
+                    "{1,0:T}: GetWriteRequestPending nRC = " +
+                        "{2,0:D}, WriteRequestPending = {3,0:D}", Device.GetTickCount (), refTag.GetName (), nRC, bWriteRequestPending);
+                Trace.WriteLine (msg);
+#endif//TRACE_SM_ACCESS
+
+                    if (nRC == TagData.SMRC_NO_ERROR)
+                    {
+                        if (WriteRequestPending)
+                        {
+                            nRC = Register.GetWriteRequest(memStream, refTag.GetSharedMemoryOffset(), ref refTag.tagWriteData.value, ref refTag.tagWriteData.quality, ref refTag.tagWriteData.timeStamp);
+
+#if TRACE_SM_ACCESS
+							msg = string.Format ("{0,8:0D}: Tag " +
+								"{1,0:T}: GetWriteRequest nRC = " +
+									"{2,0:D}", Device.GetTickCount (), refTag.GetName (), nRC);
+							Trace.WriteLine (msg);
+#endif//TRACE_SM_ACCESS
+
+                            if (nRC == TagData.SMRC_NO_ERROR)
+                            {
+                                refTag.tagWriteRequestPending = true;
+                            }
+                        }
+                    }
+
+                    // Check for pending read requests
+                    bool bReadRequestPending = false;
+                    nRC = Register.GetReadRequestPending(memStream, refTag.GetSharedMemoryOffset(), ref bReadRequestPending);
+
+#if TRACE_SM_ACCESS
+                    msg = string.Format ("{0,8:0D}: Tag " +
+                        "{1,0:T}: GetReadRequestPending nRC = " +
+                            "{2,0:D}, bReadRequestPending = {3,0:D}", Device.GetTickCount (), refTag.GetName (), nRC, bReadRequestPending);
+                    Trace.WriteLine (msg);
+#endif//TRACE_SM_ACCESS
+
+                    if (nRC == TagData.SMRC_NO_ERROR)
+                    {
+                        if (bReadRequestPending)
+                        {
+                            nRC = Register.GetReadRequest(memStream, refTag.GetSharedMemoryOffset());
+
+#if TRACE_SM_ACCESS
+                            msg = string.Format ("{0,8:0D}: Tag " +
+                                "{1,0:T}: GetReadRequest nRC = " +
+                                    "{2,0:D}", Device.GetTickCount (), refTag.GetName (), nRC);
+                            Trace.WriteLine (msg);
+#endif//TRACE_SM_ACCESS
+
+                            if (nRC == TagData.SMRC_NO_ERROR)
+                            {
+                                refTag.tagReadRequestPending = true;
+                            }
+                        }
+                    }
+
+                    try
+                    {
+                        mutex.ReleaseMutex();
+                        lockCount--;
+                    }
+                    catch (SystemException ex)
+                    {
+                        Console.WriteLine("Exception on return from ReleaseMutex ()." +
+                            "\r\n\tMessage: {0}", ex.Message);
+                    }
+                    pSharedMemoryBaseMem = null;
+                }
+            } // while (true)
+
+            // The only time we should fall out of this function is if the quit event is set
+            // and that only happens when we are shutting down
+
+        } // public static void mainLoop ()
+
+
+        // *************************************************************************************
+        public static void StartExportConfiguration(string strApplicationDir, string strConfigName)
+        {
+            // Create a configuration file in the application's directory
+            string strConfigFile = strApplicationDir;
+            strConfigFile += "\\" + strConfigName;
+            strConfigFile += ".xml";
+
+            FileStream sFile = null;
+            bool goodStream = true;
+            try
+            {
+                sFile = new FileStream(strConfigFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+            }
+            catch (SystemException ex)
+            {
+                Console.WriteLine("Unable to export configuration.  FileStream failed with error " + ex.Message);
+                goodStream = false;
+            }
+
+            if (goodStream == true)
+            {
+                using (sFile)
+                {
+                    // Export configuration
+                    // Release file
+                    sFile.Close();
+                    ExportConfiguration(strConfigFile, strConfigName);
+                    Console.WriteLine("Created xml config file. Press a key to finish");
+                    Console.ReadKey();
+                }
+            }
+
+        } // StartExportConfiguration ()
+
+
+        // *************************************************************************************
+        public static void ExportConfiguration(string strConfigFile, string strConfigName)
+        {
+            // Create the Configuration File in XML format
+
+            // Important: For the sake of example, the reference implementation will create the XML file in a rudimentary fashion.
+            // The vendor is free to utilize preferred techniques for generating XML, such as DOM.
+
+            if (File.Exists(strConfigFile))
+            {
+                // Create a file to write to.
+                File.AppendAllText(strConfigFile, "<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+                File.AppendAllText(strConfigFile, "<custom_interface_config:Configuration xmlns:custom_interface_config=\"http://www.kepware.com/schemas/custom_interface_config\">");
+                File.AppendAllText(strConfigFile, "<custom_interface_config:Copyright>The CID Interface and CID Definition file formats are the Copyright of Kepware Technologies and may only be used with KEPServer based products.  Use of the CID interfaces and file formats in any other manner is strictly forbidden.</custom_interface_config:Copyright>");
+                File.AppendAllText(strConfigFile, "<custom_interface_config:Name>" + strConfigName + "</custom_interface_config:Name>");
+                //// Support Info
+                File.AppendAllText(strConfigFile, "<custom_interface_config:SupportInfo>");
+                File.AppendAllText(strConfigFile, "<custom_interface_config:ContactInfo>");
+                File.AppendAllText(strConfigFile, "<custom_interface_config:CompanyName>My Company</custom_interface_config:CompanyName>");
+                File.AppendAllText(strConfigFile, "<custom_interface_config:Phone>1-888-555-1212</custom_interface_config:Phone>");
+                File.AppendAllText(strConfigFile, "<custom_interface_config:Email>support@mycompany.com</custom_interface_config:Email>");
+                File.AppendAllText(strConfigFile, "<custom_interface_config:WebURL>www.mycompany.com</custom_interface_config:WebURL>");
+                File.AppendAllText(strConfigFile, "<custom_interface_config:ContactAdditional></custom_interface_config:ContactAdditional>");
+                File.AppendAllText(strConfigFile, "</custom_interface_config:ContactInfo>\r\n");
+                File.AppendAllText(strConfigFile, "<custom_interface_config:ConfigurationLaunchHint>To export configuration, use argument -exportconfig.  Example: cidarefimplcpp.exe -exportconfig</custom_interface_config:ConfigurationLaunchHint>");
+                File.AppendAllText(strConfigFile, "<custom_interface_config:RuntimeLaunchHint>Run without any arguments.  Example: cidarefimplcpp.exe</custom_interface_config:RuntimeLaunchHint>");
+                File.AppendAllText(strConfigFile, "<custom_interface_config:HelpLaunchHint></custom_interface_config:HelpLaunchHint>");
+                File.AppendAllText(strConfigFile, "<custom_interface_config:SupportAdditional></custom_interface_config:SupportAdditional>");
+                File.AppendAllText(strConfigFile, "</custom_interface_config:SupportInfo>");
+            }
+
+            if (deviceSet.Count > 0)
+            {
+                // Walk the device set
+                // Shared Memory Size
+                File.AppendAllText(strConfigFile, "<custom_interface_config:SharedMemorySize>" + sharedMemorySize + "</custom_interface_config:SharedMemorySize>");
+                // <device list>
+                File.AppendAllText(strConfigFile, "<custom_interface_config:DeviceList>");
+                // Have each device export its configuration
+                foreach (Device device in deviceSet)
+                {
+                    // Call on device to export its configuration
+                    device.ExportConfiguration(strConfigFile);
+                }
+                File.AppendAllText(strConfigFile, "</custom_interface_config:DeviceList>");
+            }
+            File.AppendAllText(strConfigFile, "</custom_interface_config:Configuration>");
+        } // ExportConfiguration ()
+
+
+        // *************************************************************************************
+        public static void SetupMutex(string strConfigName)
+        {
+            //Set up a mutex to control access to shared memory
+            // The value of this variable is set by the mutex
+            // constructor. It is true if the named system mutex was
+            // created, and false if the named mutex already existed.
+            //
+            bool createdNewMutex = false;
+
+            //string strConfigName = "cidarefimplcsharp";
+            // We need to have a name
+            string strName = strConfigName;
+            Debug.Assert(!strName.Equals(""));
+
+            // Name should be prefixed with 'Global\\' for Vista support
+            if (strName.Substring(0, 7) != "Global\\")
+            {
+                strName = "Global\\" + strName;
+            }
+
+            strName += "_sm_lock";
+
+            MutexAccessRule rule = new MutexAccessRule(
+                new SecurityIdentifier(WellKnownSidType.WorldSid, null),
+                MutexRights.Synchronize | MutexRights.Modify |
+                MutexRights.ReadPermissions | MutexRights.FullControl |
+                MutexRights.TakeOwnership,
+                AccessControlType.Allow);
+
+            mSec.AddAccessRule(rule);
+
+            // Rewrote the Mutex constructor call for migration from .NET Framework 3.5 to .NET Core 3.2
+            //mutex = new Mutex (true, strName, out createdNewMutex, mSec);
+            mutex = new Mutex(true, strName, out createdNewMutex);
+            mutex.SetAccessControl(mSec);
+
+
+
+            if (createdNewMutex == true)
+            {
+                //System.Console.WriteLine ("Success: created mutex {0}", strName);
+                mutex.ReleaseMutex();//that was requested at creation
+            }
+            else
+            {
+                //System.Console.WriteLine ("Failed to create mutex {0}", strName);
+            }
+
+        } // SetUpMutex ()
+
+
+        // *************************************************************************************
+        public static void StartQuitThread()
+        {
+            QuitThread quitThreadClass = new QuitThread();
+            Thread quitThread = new Thread(quitThreadClass.RuntimeThreadProc);
+            quitThread.Name = "Quit_Loop";
+            quitThread.Start();
+        } // StartQuitThread ()
+
+        // **************************************************************************
+        // GetNextTag
+        // Purpose: Provide caller with the next tag to work with.  Next tag is based
+        // on order of the tag set within each device set, which is also ordered.
+        // **************************************************************************
+        public static Tag GetNextTag()
+        {
+
+            // Look for empty set
+            if (deviceSet.Count == 0)
+            {
+                return (null);
+            }
+
+            // Upon rollover, start from beginning
+            if (deviceSet.Count == 1)
+            {
+                nextDeviceIndex = 0;
+            }
+            else if (nextDeviceIndex > deviceSet.Count - 1) // if at the last index
+            {
+                nextDeviceIndex = 0;
+                //also reset the tag iterator for this device for the next pass
+                deviceSet[nextDeviceIndex].ResetTagIterator();
+            }
+
+            Device refDevice = deviceSet[nextDeviceIndex];
+
+            bool bIsLast = false;
+
+            Tag refTag = null;
+
+            if (refDevice != null)
+            {
+                refTag = Device.GetNextTag(ref refDevice, ref bIsLast);
+
+                // If refTag is last tag current device's list, move to next device
+                if (bIsLast)
+                    nextDeviceIndex++;
+            }
+
+            return (refTag);
+
+        } // public static Tag GetNextTag ()
+
+        // *************************************************************************************
+        public static void GetFtNow(ref FILETIME ft)
+        {
+            long hFT1 = DateTime.Now.ToFileTime();
+            ft.dwLowDateTime = (UInt32)(hFT1 & 0xFFFFFFFF);
+            ft.dwHighDateTime = (UInt32)(hFT1 >> 32);
+        }
+
+    } // class MemInterface
+
+    // *************************************************************************************
+    
+
+} //namespace CidaRefImplCsharp
