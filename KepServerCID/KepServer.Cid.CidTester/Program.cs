@@ -22,7 +22,8 @@ namespace KepServer.Cid.CidTester
                 .AddTag(new FloatTag("aFloatTag", "a Float tag"))
                 .AddTag(new DoubleTag("aDoubleTag", "a Double tag"))
                 .AddTag(new DateTag("aDateTag", "a Date tag"))
-                .AddTag(new StringTag("aStringTag", "a String tag", 16));
+                .AddTag(new StringTag("aStringTag", "a String tag", 16))
+                .AddTag(new BoolArrayTag("aBoolArrayTag", 3, 4, "a Boolean array tag of 3 x 4"));
 
 
             CidConnector connector = new CidConnector();
