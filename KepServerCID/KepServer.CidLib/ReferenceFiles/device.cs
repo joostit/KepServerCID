@@ -21,6 +21,7 @@ using System.Runtime.InteropServices;
 using WORD = System.UInt16;
 using DWORD = System.UInt32;
 using KepServer.CidLib.Types;
+using KepServer.CidLib.Interop;
 
 namespace CidaRefImplCsharp
 {
@@ -33,12 +34,12 @@ namespace CidaRefImplCsharp
         private MemInterface memInterface;
 
         // Properties calculated
-        public DWORD devSharedMemoryOffset;
+        private DWORD devSharedMemoryOffset;
 
-        public List<Tag> tagSet;
-        public static int nextTagIndex;		// Next tag to provide to GetNextTag
+        private List<Tag> tagSet;
+        private static int nextTagIndex;		// Next tag to provide to GetNextTag
 
-        // *************************************************************************************
+       
         public Device(DeviceEntry tDeviceEntry, MemInterface memInterface)
         {
             this.memInterface = memInterface;
@@ -51,7 +52,7 @@ namespace CidaRefImplCsharp
             nextTagIndex = tagSet.Count; //this will be zero, and the starting index
         }
 
-        // *************************************************************************************
+
         public void ExportConfiguration(string strConfigFile)
         {
             if (File.Exists(strConfigFile))
@@ -74,42 +75,39 @@ namespace CidaRefImplCsharp
                 File.AppendAllText(strConfigFile, "</custom_interface_config:TagList>");
                 File.AppendAllText(strConfigFile, "</custom_interface_config:Device>");
             }
-        } // ExportConfiguration (string strConfigFile)
+        } 
 
-        // *************************************************************************************
-        // Name
+
         public string GetName()
         {
             return (devName);
         }
 
-        // *************************************************************************************
-        // ID
+
         public string GetID()
         {
             return (devID);
         }
 
-        // *************************************************************************************
-        // Shared Memory Offset
+
         public void SetSharedMemoryOffset(DWORD sharedMemoryOffset)
         {
             devSharedMemoryOffset = sharedMemoryOffset;
         }
 
-        // *************************************************************************************
+
         public DWORD GetSharedMemoryOffset()
         {
             return (devSharedMemoryOffset);
         }
 
-        // *************************************************************************************
+
         public void ResetTagIterator()
         {
             nextTagIndex = 0;
         }
 
-        //**************************************************************
+
         public DWORD AddTag(TagEntry tTagEntry, DWORD relativeOffset)
         {
             DWORD readOffset = 0;
@@ -199,7 +197,7 @@ namespace CidaRefImplCsharp
                 msg = string.Format("{0,8:0D}: Tag " +
                     "{1,0:T}" + ": SetReadOffset nRC = " +
                     "{2,0:D}" +
-                    ", dwReadOffset = {3,0:D}", GetTickCount(), refTag.GetName(), nRC, readOffset);
+                    ", dwReadOffset = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, readOffset);
                 Trace.WriteLine(msg);
 #endif//TRACE_SM_ACCESS
 
@@ -209,7 +207,7 @@ namespace CidaRefImplCsharp
                 msg = string.Format("{0,8:0D}: Tag " +
                     "{1,0:T}: SetWriteOffset nRC = " +
                     "{2,0:D}" +
-                    ", dwWriteOffset = {3,0:D}", GetTickCount(), refTag.GetName(), nRC, writeOffset);
+                    ", dwWriteOffset = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, writeOffset);
                 Trace.WriteLine(msg);
 #endif//TRACE_SM_ACCESS
 
@@ -219,7 +217,7 @@ namespace CidaRefImplCsharp
                 msg = string.Format("{0,8:0D}: Tag " +
                     "{1,0:T}: SetReadValueType nRC = " +
                     "{2,0:D}" +
-                    ", ReadValueType = {3,0:D}", GetTickCount(), refTag.GetName(), nRC, refTag.GetReadValueType());
+                    ", ReadValueType = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, refTag.GetReadValueType());
                 Trace.WriteLine(msg);
 #endif//TRACE_SM_ACCESS
 
@@ -231,7 +229,7 @@ namespace CidaRefImplCsharp
                     msg = string.Format("{0,8:0D}: Tag " +
                         "{1,0:T}: SetWriteValueType nRC = " +
                         "{2,0:D}" +
-                        ", WriteValueType = {3,0:D}", GetTickCount(), refTag.GetName(), nRC, refTag.GetWriteValueType());
+                        ", WriteValueType = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, refTag.GetWriteValueType());
                     Trace.WriteLine(msg);
 #endif//TRACE_SM_ACCESS
                 }
@@ -241,7 +239,7 @@ namespace CidaRefImplCsharp
                 msg = string.Format("{0,8:0D}: Tag " +
                     "{1,0:T}: SetReadValueExtSize nRC = " +
                     "{2,0:D}" +
-                    ", ReadValueExtSize = {3,0:D}", GetTickCount(), refTag.GetName(), nRC, refTag.GetReadValueExtSize());
+                    ", ReadValueExtSize = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, refTag.GetReadValueExtSize());
                 Trace.WriteLine(msg);
 #endif//TRACE_SM_ACCESS
                 if (writeOffset != 0)
@@ -252,7 +250,7 @@ namespace CidaRefImplCsharp
                     msg = string.Format("{0,8:0D}: Tag " +
                         "{1,0:T}: SetWriteValueExtSize nRC = " +
                         "{2,0:D}" +
-                        ", WriteValueExtSize = {3,0:D}", GetTickCount(), refTag.GetName(), nRC, refTag.GetWriteValueExtSize());
+                        ", WriteValueExtSize = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, refTag.GetWriteValueExtSize());
                     Trace.WriteLine(msg);
 #endif//TRACE_SM_ACCESS
                 }
@@ -265,7 +263,7 @@ namespace CidaRefImplCsharp
                     msg = string.Format("{0,8:0D}: Tag " +
                         "{1,0:T}: SetReadValueArrayStringSize nRC = " +
                         "{2,0:D}" +
-                        ", ReadValueArrayStringSize = {3,0:D}", GetTickCount(), refTag.GetName(), nRC, refTag.GetReadValueArrayStringSize());
+                        ", ReadValueArrayStringSize = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, refTag.GetReadValueArrayStringSize());
                     Trace.WriteLine(msg);
 #endif//TRACE_SM_ACCESS
                     if (writeOffset != 0)
@@ -276,7 +274,7 @@ namespace CidaRefImplCsharp
                         msg = string.Format("{0,8:0D}: Tag " +
                             "{1,0:T}: SetWriteValueArrayStringSize nRC = " +
                             "{2,0:D}" +
-                            ", WriteValueArrayStringSize = {3,0:D}", GetTickCount(), refTag.GetName(), nRC, refTag.GetWriteValueArrayStringSize());
+                            ", WriteValueArrayStringSize = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, refTag.GetWriteValueArrayStringSize());
                         Trace.WriteLine(msg);
 #endif//TRACE_SM_ACCESS
                     }
@@ -298,7 +296,7 @@ namespace CidaRefImplCsharp
         } // AddTag ()
 
 
-        // *************************************************************************************
+
         public static Tag GetNextTag(ref Device pDev, ref bool bIsLast)
         {
             bIsLast = false;
@@ -319,10 +317,6 @@ namespace CidaRefImplCsharp
 
             return (retTag);
         } //  GetNextTag (ref Device pDev, ref bool bIsLast)
-
-        // *************************************************************************************
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
-        public static extern int GetTickCount();
 
      
     } // class Device

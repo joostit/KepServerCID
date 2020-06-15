@@ -14,6 +14,16 @@ using KepServer.CidLib.Types;
 
 namespace CidaRefImplCsharp
 {
+    /// <summary>
+    /// Description:  Defines the Tag class.  The Tag class includes the
+    /// name of the tag, its datatype, and its offset within Shared Memory to name
+    /// a few.  It also maintains a read data class and write data class.
+    /// These data classes are separate from the Shared Memory DATA byte array and
+    /// are meant to store locally, the value from a "read response" and the value
+    /// for a "write request".  In a commerical application these values would be
+    /// used in communicating with an actual device. The Device is responsible
+    /// for exporting its definition to the Configuration file when requested.
+    /// </summary>
     public class Tag
     {
         // Properties from table
@@ -28,44 +38,26 @@ namespace CidaRefImplCsharp
         public WORD tagArrayCols;
 
         // Properties calculated
-        public DWORD tagRelativeOffset;			// Register's offset relative to device's shared memory offset
-        public DWORD tagSharedMemoryOffset;		// Register's absolute offset in shared memory
+        private DWORD tagRelativeOffset;			// Register's offset relative to device's shared memory offset
+        private DWORD tagSharedMemoryOffset;		// Register's absolute offset in shared memory
 
-        public bool tagWriteRequestPending;
-        public bool tagReadRequestPending;
-        public bool tagWriteResponsePending;
-        public bool tagReadResponsePending;
+        internal bool tagWriteRequestPending;
+        internal bool tagReadRequestPending;
+        internal bool tagWriteResponsePending;
+        internal bool tagReadResponsePending;
 
         public Device tagDevice; //reference to the device that owns this tag
 
         public TagData tagReadData;
         public TagData tagWriteData;
 
-        // *************************************************************************************
-        // Name
+
         public string GetName()
         {
             return (tagName);
         }
 
-        public DWORD readOffset;
-        public DWORD writeOffset;
-        public DWORD regReserved12;
 
-        // *************************************************************************************
-        public Tag(MemInterface memInterface, DWORD _readOffset, DWORD _writeOffset, VALTYPE vType,
-            WORD stringSize, int rows, int cols)
-        {
-            readOffset = _readOffset;
-            writeOffset = _writeOffset;
-            tagReadData = new TagData(memInterface, _readOffset, vType, stringSize, rows, cols);
-            if (writeOffset != 0)
-            {
-                tagWriteData = new TagData(memInterface, _writeOffset, vType, stringSize, rows, cols);
-            }
-        }
-
-        // *************************************************************************************
         public Tag(MemInterface memInterface, ref Device device, TagEntry tTagEntry, DWORD dwRelativeOffset, DWORD dwParentOffset)
         {
             tagDevice = device;
@@ -101,17 +93,13 @@ namespace CidaRefImplCsharp
                     tTagEntry.stringSize, tTagEntry.arrayRows, tTagEntry.arrayCols);
             }
 
-        } // Tag constructor for AddTag
+        }
 
-
-        // *************************************************************************************
-        
-
-        // **************************************************************************
-        // GetCIDAddress
-        // Purpose: Format an address to meet the expectation of the CID driver (e.g. D0)
-        // This is not to be confused with a PLC address.
-        // **************************************************************************
+        /// <summary>
+        /// Purpose: Format an address to meet the expectation of the CID driver (e.g. D0)
+        /// This is not to be confused with a PLC address.
+        /// </summary>
+        /// <param name="strAddress"></param>
         public void GetCIDAddress(ref string strAddress)
         {
             // Format register number
@@ -167,10 +155,10 @@ namespace CidaRefImplCsharp
                 }
                 strAddress += strExtBuffer;
             }
-        } // GetCIDAddress(ref string strAddress)
+        }
 
 
-        // *************************************************************************************
+
         public void ExportConfiguration(string strConfigFile)
         {
             // Generate address to be used by CID
@@ -199,28 +187,32 @@ namespace CidaRefImplCsharp
                 File.AppendAllText(strConfigFile, "<custom_interface_config:GroupName>" + tagGroupName + "</custom_interface_config:GroupName>");
                 File.AppendAllText(strConfigFile, "</custom_interface_config:Tag>");
             }
-        } // ExportConfiguration(string strConfigFile)
+        }
 
-        // *************************************************************************************
-        // This is how we make an array type from a basic type.
+
+        /// <summary>
+        /// This is how we make an array type from a basic type.
+        /// </summary>
+        /// <param name="dataType"></param>
+        /// <returns></returns>
         public static VALTYPE MakeArrayType(VALTYPE dataType)
         {
             return (VALTYPE)(dataType | Value.T_ARRAY);
         }
 
-        // *************************************************************************************
+
         public static VALTYPE MakeBasicType(VALTYPE dataType)
         {
             return (VALTYPE)(dataType & ~Value.T_ARRAY);
         }
 
-        // *************************************************************************************
+
         public static bool IsArrayType(VALTYPE dataType)
         {
             return ((dataType & Value.T_ARRAY) == Value.T_ARRAY ? true : false);
         }
 
-        // *************************************************************************************
+
         public static string TextFromType(VALTYPE valueType)
         {
             switch (valueType)
@@ -251,27 +243,26 @@ namespace CidaRefImplCsharp
                 default:
                     return ("Default");
             }
-        } // TextFromType(VALTYPE valueType)
+        } 
 
-        // *************************************************************************************
         public int GetStringSize()
         {
             return (tagStringSize);
         }
 
-        // *************************************************************************************
+        
         public int GetArrayRows()
         {
             return (tagArrayRows);
         }
 
-        // *************************************************************************************
+        
         public int GetArrayCols()
         {
             return (tagArrayCols);
         }
 
-        // *************************************************************************************
+        
         public int GetExtendedSize()
         {
             int elementSize = 0;
@@ -291,22 +282,19 @@ namespace CidaRefImplCsharp
         }
 
 
-        // *************************************************************************************
-        // Data Type
         public VALTYPE GetDataType()
         {
             return (tagDataType);
         }
 
-        // *************************************************************************************
-        // Read/Write
+        
         public AccessType GetReadWrite()
         {
             return (tagReadWrite);
         }
 
 
-        // *************************************************************************************
+        
         public void GetReadWriteAsText(ref string strReadWrite)
         {
             if (GetReadWrite() == AccessType.READONLY)
@@ -315,90 +303,81 @@ namespace CidaRefImplCsharp
                 strReadWrite = "Read/Write";
         }
 
-        // *************************************************************************************
+        
         public bool IsReadable()
         {
             AccessType readWrite = GetReadWrite();
             return (readWrite == AccessType.READONLY || readWrite == AccessType.READWRITE);
         }
 
-        // *************************************************************************************
+
         public bool IsWriteable()
         {
             AccessType readWrite = GetReadWrite();
             return (readWrite == AccessType.WRITEONLY || readWrite == AccessType.READWRITE);
         }
 
-        // *************************************************************************************
-        // Scan Rate
+
         public int GetScanRateMilliseconds()
         {
             return (tagScanRateMS);
         }
 
-        // *************************************************************************************
-        // Description
+
         public string GetDescription()
         {
             return (tagDescription);
         }
 
-        // *************************************************************************************
-        // Group Name
+
         public string GetGroupName()
         {
             return (tagGroupName);
         }
 
-        // *************************************************************************************
+
         public DWORD GetRelativeOffset()
         {
             return (tagRelativeOffset);
         }
 
-        // *************************************************************************************
-        // Shared Memory Offset
+
         public void SetSharedMemoryOffset(DWORD sharedMemoryOffset)
         {
             tagSharedMemoryOffset = sharedMemoryOffset;
         }
 
-        // *************************************************************************************
+
         public DWORD GetSharedMemoryOffset()
         {
             return (tagSharedMemoryOffset);
         }
 
-        // ReadData Value Type
-        // *************************************************************************************
+
         public VALTYPE GetReadValueType()
         {
             return (tagReadData.value.GetValueType());
         }
 
-        // *************************************************************************************
-        // WriteData Value Type
+
         public VALTYPE GetWriteValueType()
         {
             return (tagWriteData.value.GetValueType());
         }
 
-        // *************************************************************************************
-        // ReadData Extended Size
+
         public WORD GetReadValueExtSize()
         {
             return (tagReadData.value.valueExtSize);
         }
 
-        // *************************************************************************************
-        // WriteData Extended Size
+
         public WORD GetWriteValueExtSize()
         {
             return (tagWriteData.value.valueExtSize);
         }
 
-        // *************************************************************************************
-        // ReadData Array String Size
+
         public WORD GetReadValueArrayStringSize()
         {
             if (tagReadData.value.valueDynamicArray.Length == 0)
@@ -411,8 +390,7 @@ namespace CidaRefImplCsharp
             return (wStrArraySize);
         }
 
-        // *************************************************************************************
-        // WriteData Array String Size
+
         public WORD GetWriteValueArrayStringSize()
         {
             if (tagWriteData.value.valueDynamicArray.Length == 0)
@@ -425,6 +403,6 @@ namespace CidaRefImplCsharp
             return (wStrArraySize);
         }
 
-    } // class Tag
+    }
 
 }

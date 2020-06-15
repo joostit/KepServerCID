@@ -2,15 +2,6 @@
 // File:  tag.cs
 // Created:  11/30/2009 Copyright (c) 2009
 //
-// Description:  Defines the Tag class.  The Tag class includes the
-// name of the tag, its datatype, and its offset within Shared Memory to name
-// a few.  It also maintains a read data class and write data class.
-// These data classes are separate from the Shared Memory DATA byte array and
-// are meant to store locally, the value from a "read response" and the value
-// for a "write request".  In a commerical application these values would be
-// used in communicating with an actual device. The Device is responsible
-// for exporting its definition to the Configuration file when requested.
-//
 // **************************************************************************
 using System;
 using System.Collections.Generic;
@@ -29,9 +20,7 @@ using KepServer.CidLib.Types;
 namespace CidaRefImplCsharp
 {
 
-    
 
-    // *************************************************************************************
     public class TagData
     {
 
@@ -80,34 +69,20 @@ namespace CidaRefImplCsharp
         public WORD quality = TagData.OPC_QUALITY_BAD_OUT_OF_SERVICE;
         public FileTime timeStamp = new FileTime();
         public Value value;
-        private MemInterface memInterface;
 
 
-        // *************************************************************************************
-        public TagData(MemInterface memInterface, DWORD memOffset, VALTYPE vType, WORD stringSize, int rows, int cols)
-        {
-            this.memInterface = memInterface;
-            value = new Value(vType, stringSize, rows, cols);
-            memInterface.GetFtNow(ref timeStamp);
-        }
-
-        // *************************************************************************************
         public TagData(MemInterface memInterface, VALTYPE vType, WORD stringSize, int rows, int cols)
         {
-            this.memInterface = memInterface;
             value = new Value(vType, stringSize, rows, cols);
             memInterface.GetFtNow(ref timeStamp);
         }
 
-        // *************************************************************************************
+
         public VALTYPE GetValueType()
         {
             return (value.GetValueType());
         }
 
-    } // class TagData
+    }
 
-
-    // *************************************************************************************
-
-} // namespace CidaRefImplCsharp
+} 

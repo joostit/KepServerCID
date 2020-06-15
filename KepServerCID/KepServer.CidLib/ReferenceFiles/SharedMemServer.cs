@@ -18,11 +18,16 @@ using System.Security.AccessControl;
 
 using WORD = System.UInt16;
 using DWORD = System.UInt32;
+using KepServer.CidLib.Interop.WinBASE;
+using KepServer.CidLib.Interop;
+using KepServer.CidLib.Interop.WinNT;
 
 namespace CidaRefImplCsharp
 {
     public class SharedMemServer : IDisposable
     {
+
+        private static readonly IntPtr NoFileHandle = new IntPtr(-1);
 
         public const UInt16 MAPSIZE = 16384;
 
@@ -41,7 +46,6 @@ namespace CidaRefImplCsharp
             Close();
         }
 
-        // *************************************************************************************
         public unsafe bool Open(string strName)
         {
             // Close file if already open
@@ -69,7 +73,7 @@ namespace CidaRefImplCsharp
 
             // Map the transport memory
             // Obtain a read/write map for the entire file
-            pMem = (byte*)MapViewOfFile(hMem, FileRights.ReadWrite, 0, 0, 0);
+            pMem = (byte*)Kernel32.MapViewOfFile(hMem, FileRights.ReadWrite, 0, 0, 0);
 
             if (pMem == null)
             {
@@ -82,34 +86,33 @@ namespace CidaRefImplCsharp
             Trace.WriteLine("Shared memory endpoint created\n");
             return true;
 
-        } // Open (string strName)
+        } 
 
-        // *************************************************************************************
+
         public unsafe void Close()
         {
             if (pMem != null)
             {
-                UnmapViewOfFile((System.IntPtr)pMem);
+                Kernel32.UnmapViewOfFile((System.IntPtr)pMem);
                 pMem = null;
             }
 
             // Close the transport mechanism
             if (hMem != IntPtr.Zero)
             {
-                CloseHandle(hMem);
+                Kernel32.CloseHandle(hMem);
                 hMem = IntPtr.Zero;
             }
 
-        } // Close()
+        } 
 
-        // *************************************************************************************
-        // Returns true if Open() was successfully called.
+
         public bool IsOpen()
         {
             return !(hMem == IntPtr.Zero);
         }
 
-        // *************************************************************************************
+        
         private bool _Create()
         {
             string strName = "";
@@ -126,7 +129,7 @@ namespace CidaRefImplCsharp
                 else if (nAttempt == 1)
                     strName = "Local\\" + memName.ToString();
 
-                hMem = CreateFileMapping(NoFileHandle, 0,
+                hMem = Kernel32.CreateFileMapping(NoFileHandle, 0,
                                                 FileProtection.ReadWrite,
                                                 0, MAPSIZE, strName);
                 if (hMem == IntPtr.Zero)
@@ -144,9 +147,9 @@ namespace CidaRefImplCsharp
 
             Trace.WriteLine("Shared memory object created as " + strName);
             return true;
-        } // _Create()
+        } 
 
-        // *************************************************************************************
+
         private bool _Open()
         {
             int nSession = -2;
@@ -166,7 +169,7 @@ namespace CidaRefImplCsharp
                 else
                     strName = "Session\\" + nSession.ToString() + memName.ToString();
 
-                hMem = OpenFileMapping(FileRights.ReadWrite, false, strName);
+                hMem = Kernel32.OpenFileMapping(FileRights.ReadWrite, false, strName);
 
             } while ((hMem == IntPtr.Zero) && nSession++ < 255);
 
@@ -177,52 +180,8 @@ namespace CidaRefImplCsharp
             }
 
             return false;
-        } // _Open()
+        } 
 
-        // *************************************************************************************
-        enum FileProtection : uint      // constants from winnt.h
-        {
-            ReadOnly = 2,
-            ReadWrite = 4
-        }
-
-        // *************************************************************************************
-        enum FileRights : uint          // constants from WinBASE.h
-        {
-            Read = 4,
-            Write = 2,
-            ReadWrite = Read + Write
-        }
-
-        static readonly IntPtr NoFileHandle = new IntPtr(-1);
-
-        // *************************************************************************************
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern IntPtr CreateFileMapping(IntPtr hFile,
-                                                int lpAttributes,
-                                                FileProtection flProtect,
-                                                uint dwMaximumSizeHigh,
-                                                uint dwMaximumSizeLow,
-                                                string lpName);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern IntPtr OpenFileMapping(FileRights dwDesiredAccess,
-                                              bool bInheritHandle,
-                                              string lpName);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern IntPtr MapViewOfFile(IntPtr hFileMappingObject,
-                                            FileRights dwDesiredAccess,
-                                            uint dwFileOffsetHigh,
-                                            uint dwFileOffsetLow,
-                                            uint dwNumberOfBytesToMap);
-        [DllImport("Kernel32.dll")]
-        static extern bool UnmapViewOfFile(IntPtr map);
-
-        [DllImport("kernel32.dll")]
-        static extern int CloseHandle(IntPtr hObject);
-
-        // *************************************************************************************
         public unsafe IntPtr Root
         {
             get
@@ -231,22 +190,22 @@ namespace CidaRefImplCsharp
             }
         }
 
-        // *************************************************************************************
+
         public unsafe void Dispose()
         {
             if (pMem != null)
             {
-                UnmapViewOfFile((System.IntPtr)pMem);
+                Kernel32.UnmapViewOfFile((System.IntPtr)pMem);
             }
 
             if (hMem != IntPtr.Zero)
             {
-                CloseHandle(hMem);
+                Kernel32.CloseHandle(hMem);
             }
             pMem = null;
             hMem = IntPtr.Zero;
-        } // Dispose()
+        }
 
-    } // class SharedMemServer : IDisposable
+    }
 
-} // namespace CidaRefImplCsharp
+}

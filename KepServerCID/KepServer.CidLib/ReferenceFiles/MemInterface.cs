@@ -17,7 +17,7 @@
 //
 // **************************************************************************
 
-// class library references
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,13 +30,13 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
 
-// C# equivalent of aliasing for readability
+
 using WORD = System.UInt16;
 using DWORD = System.UInt32;
 using KepServer.CidLib;
 using KepServer.CidLib.Types;
 
-// common namespace for related files in project
+
 namespace CidaRefImplCsharp
 {
 
@@ -47,7 +47,7 @@ namespace CidaRefImplCsharp
 
         // Define the devices that we will use.
         // For test purposes, you may comment out a device you do not wish to create.
-        public DeviceEntry[] DeviceTable =
+        private DeviceEntry[] DeviceTable =
             {
             //                         Name,				ID
 			new DeviceEntry ("Device1",              "1"),
@@ -55,28 +55,28 @@ namespace CidaRefImplCsharp
             };
 
         // List of devices
-        public List<Device> deviceSet = new List<Device>();
-        public int nextDeviceIndex;      // Next device to provide to GetNextTag
+        private List<Device> deviceSet = new List<Device>();
+        private int nextDeviceIndex;      // Next device to provide to GetNextTag
 
         // Tag list for each device
-        public List<TagEntry>[] tagEntryList;
+        private List<TagEntry>[] tagEntryList;
 
         // shared memory class and related stream
-        public SharedMemServer sharedMemoryServer = new SharedMemServer();
+        private SharedMemServer sharedMemoryServer = new SharedMemServer();
         public UnmanagedMemoryStream memStream;
 
         // CSharp mutex handling
         // Create a security object that grants no access.
-        public MutexSecurity mSec = new MutexSecurity();
+        private MutexSecurity mutexSecurity = new MutexSecurity();
 
-        public Mutex mutex = null;
+        private Mutex mutex = null;
 
-        static DWORD sharedMemorySize;
-        static int maxSharedMemSize = SharedMemServer.MAPSIZE;
+        private DWORD sharedMemorySize;
+        private int maxSharedMemSize = SharedMemServer.MAPSIZE;
         public bool exitFlag = false;
 
 
-        // *************************************************************************************
+
         public void Start(string[] args, string strConfigName, string strApplicationDir, bool exportConfig)
         {
             //Set up a mutex to control access to shared memory
@@ -119,9 +119,9 @@ namespace CidaRefImplCsharp
                 sharedMemoryServer.Dispose();
             }
 
-        } // Start
+        }
 
-        // *************************************************************************************
+
         public void LoadTagEntryLists()
         {
             int deviceNum;
@@ -183,9 +183,9 @@ namespace CidaRefImplCsharp
                 DeviceTable[deviceNum].tagEntryList = tagEntryList[deviceNum];
             }
 
-        } // LoadTagEntryLists ()
+        } 
 
-        // *************************************************************************************
+
         public void LoadTables()
         {
             // If Shared Memory File opened successfully, go on to define our registers
@@ -253,17 +253,16 @@ namespace CidaRefImplCsharp
                     mutex.ReleaseMutex();
                     pSharedMemoryBaseMem = null;
 
-                } // if (mutex.WaitOne () == true)
+                } 
                 else
                 {
                     System.Console.WriteLine("CRuntime.Initialize failed to acquirelock");
                 }
-            } //if (refSharedMemory.IsOpen ())
+            }
 
-        } // public static void LoadTables ()
+        } 
 
 
-        // *************************************************************************************
         public void mainLoop()
         {
             if (exitFlag == true) // may be set after exporting config
@@ -531,15 +530,15 @@ namespace CidaRefImplCsharp
                     }
                     pSharedMemoryBaseMem = null;
                 }
-            } // while (true)
+            } 
 
             // The only time we should fall out of this function is if the quit event is set
             // and that only happens when we are shutting down
 
-        } // public static void mainLoop ()
+        }
 
 
-        // *************************************************************************************
+
         public void StartExportConfiguration(string strApplicationDir, string strConfigName)
         {
             // Create a configuration file in the application's directory
@@ -572,10 +571,10 @@ namespace CidaRefImplCsharp
                 }
             }
 
-        } // StartExportConfiguration ()
+        } 
 
 
-        // *************************************************************************************
+
         public void ExportConfiguration(string strConfigFile, string strConfigName)
         {
             // Create the Configuration File in XML format
@@ -622,10 +621,10 @@ namespace CidaRefImplCsharp
                 File.AppendAllText(strConfigFile, "</custom_interface_config:DeviceList>");
             }
             File.AppendAllText(strConfigFile, "</custom_interface_config:Configuration>");
-        } // ExportConfiguration ()
+        }
 
 
-        // *************************************************************************************
+
         public void SetupMutex(string strConfigName)
         {
             //Set up a mutex to control access to shared memory
@@ -655,12 +654,12 @@ namespace CidaRefImplCsharp
                 MutexRights.TakeOwnership,
                 AccessControlType.Allow);
 
-            mSec.AddAccessRule(rule);
+            mutexSecurity.AddAccessRule(rule);
 
             // Rewrote the Mutex constructor call for migration from .NET Framework 3.5 to .NET Core 3.2
             //mutex = new Mutex (true, strName, out createdNewMutex, mSec);
             mutex = new Mutex(true, strName, out createdNewMutex);
-            mutex.SetAccessControl(mSec);
+            mutex.SetAccessControl(mutexSecurity);
 
 
 
@@ -674,10 +673,9 @@ namespace CidaRefImplCsharp
                 //System.Console.WriteLine ("Failed to create mutex {0}", strName);
             }
 
-        } // SetUpMutex ()
+        } 
 
 
-        // *************************************************************************************
         public void StartQuitThread()
         {
             QuitThread quitThreadClass = new QuitThread(this);
@@ -729,9 +727,9 @@ namespace CidaRefImplCsharp
 
             return (refTag);
 
-        } // public static Tag GetNextTag ()
+        } 
 
-        // *************************************************************************************
+
         public void GetFtNow(ref FileTime ft)
         {
             long hFT1 = DateTime.Now.ToFileTime();
@@ -739,9 +737,6 @@ namespace CidaRefImplCsharp
             ft.dwHighDateTime = (UInt32)(hFT1 >> 32);
         }
 
-    } // class MemInterface
+    } 
 
-    // *************************************************************************************
-
-
-} //namespace CidaRefImplCsharp
+} 

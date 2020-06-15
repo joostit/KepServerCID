@@ -22,30 +22,31 @@ using KepServer.CidLib.Types;
 
 namespace CidaRefImplCsharp
 {
+    /// <summary>
+    /// The Register class is used for accessing shared memory.
+    /// </summary>
     public static class Register
     {
-        public const int READ_OFFSET = 0;
-        public const int WRITE_OFFSET = 4;
+        private const int READ_OFFSET = 0;
+        private const int WRITE_OFFSET = 4;
         public const int DATA_MIN_OFFSET = 12;
         public const int DATA_SIZE_MIN = 30;
-        public const int DATA_STATUS_OFFSET = 0;
-        public const int DATA_ERRORCODE_OFFSET = 2;
-        public const int DATA_QUALITY_OFFSET = 6;
-        public const int DATA_TIMESTAMP_OFFSET = 8;
-        public const int DATA_VALUE_OFFSET = 16;
-        public const int VALUE_TYPE_OFFSET = 0;
-        public const int VALUE_8BYTEVAL_OFFSET = 4;
-        public const int VALUE_EXTSIZE_OFFSET = 12;
-        public const int VALUE_EXTARRAY_OFFSET = 14;
+        private const int DATA_STATUS_OFFSET = 0;
+        private const int DATA_ERRORCODE_OFFSET = 2;
+        private const int DATA_QUALITY_OFFSET = 6;
+        private const int DATA_TIMESTAMP_OFFSET = 8;
+        private const int DATA_VALUE_OFFSET = 16;
+        private const int VALUE_TYPE_OFFSET = 0;
+        private const int VALUE_8BYTEVAL_OFFSET = 4;
+        private const int VALUE_EXTSIZE_OFFSET = 12;
+        private const int VALUE_EXTARRAY_OFFSET = 14;
 
-        public const int STRINGARRAY_START = 0;
-        public const int STRINGARRAY_STRINGSIZE_OFFSET = STRINGARRAY_START;
-        public const int STRINGARRAY_ABDATA_OFFSET = STRINGARRAY_START + 2;
+        private const int STRINGARRAY_START = 0;
+        private const int STRINGARRAY_STRINGSIZE_OFFSET = STRINGARRAY_START;
+        private const int STRINGARRAY_ABDATA_OFFSET = STRINGARRAY_START + 2;
 
 
-        // The Register class is used for accessing shared memory.
 
-        // *************************************************************************************
         public static void SetWriteValueType(UnmanagedMemoryStream s, long memOffset, WORD writeValueType)
         {
             if (GetRegisterWriteOffset(s, memOffset) != 0)
@@ -54,7 +55,7 @@ namespace CidaRefImplCsharp
             }
         }
 
-        // *************************************************************************************
+
         public static void SetReadValueType(UnmanagedMemoryStream s, long memOffset, WORD readValueType)
         {
             if (GetRegisterReadOffset(s, memOffset) != 0)
@@ -63,19 +64,19 @@ namespace CidaRefImplCsharp
             }
         }
 
-        // *************************************************************************************
+
         public static void SetReadOffset(UnmanagedMemoryStream s, long memOffset, DWORD readOffset)
         {
             SetRegisterReadOffset(s, memOffset, readOffset);
         }
 
-        // *************************************************************************************
+
         public static void SetWriteOffset(UnmanagedMemoryStream s, long memOffset, DWORD writeOffset)
         {
             SetRegisterWriteOffset(s, memOffset, writeOffset);
         }
 
-        // *************************************************************************************
+
         public static DWORD GetRegisterReadOffset(UnmanagedMemoryStream s, long memOffset)
         {
             DWORD val;
@@ -84,7 +85,7 @@ namespace CidaRefImplCsharp
             return (val = r.ReadUInt32());
         }
 
-        // *************************************************************************************
+
         public static DWORD GetRegisterWriteOffset(UnmanagedMemoryStream s, long memOffset)
         {
             DWORD val;
@@ -93,7 +94,7 @@ namespace CidaRefImplCsharp
             return (val = r.ReadUInt32());
         }
 
-        // *************************************************************************************
+
         public static void SetRegisterReadOffset(UnmanagedMemoryStream s, long memOffset, DWORD readOffset)
         {
             BinaryWriter w = new BinaryWriter(s);
@@ -102,7 +103,7 @@ namespace CidaRefImplCsharp
             w.Flush();
         }
 
-        // *************************************************************************************
+
         public static void SetRegisterWriteOffset(UnmanagedMemoryStream s, long memOffset, DWORD writeOffset)
         {
             BinaryWriter w = new BinaryWriter(s);
@@ -111,7 +112,7 @@ namespace CidaRefImplCsharp
             w.Flush();
         }
 
-        // *************************************************************************************
+
         public static VALTYPE GetDataValueType(UnmanagedMemoryStream s, long memOffset)
         {
             VALTYPE val;
@@ -121,7 +122,7 @@ namespace CidaRefImplCsharp
         }
 
 
-        // *************************************************************************************
+
         public static void SetDataValueType(UnmanagedMemoryStream s, long memOffset, WORD type)
         {
             BinaryWriter w = new BinaryWriter(s);
@@ -138,7 +139,7 @@ namespace CidaRefImplCsharp
             }
         }
 
-        // *************************************************************************************
+
         public static void SetWriteValueExtSize(UnmanagedMemoryStream s, long memOffset, WORD extSize)
         {
             if (GetRegisterWriteOffset(s, memOffset) != 0)
@@ -147,7 +148,7 @@ namespace CidaRefImplCsharp
             }
         }
 
-        // *************************************************************************************
+
         public static void SetDataValueExtSize(UnmanagedMemoryStream s, long memOffset, WORD extSize)
         {
             BinaryWriter w = new BinaryWriter(s);
@@ -156,7 +157,7 @@ namespace CidaRefImplCsharp
             w.Flush();
         }
 
-        // *************************************************************************************
+
         public static void GetReadResponsePending(UnmanagedMemoryStream s, long memOffset, ref bool bReadResponsePending)
         {
             if (GetRegisterReadOffset(s, memOffset) != 0)
@@ -165,7 +166,7 @@ namespace CidaRefImplCsharp
             }
         }
 
-        // *************************************************************************************
+
         public static void GetWriteResponsePending(UnmanagedMemoryStream s, long memOffset, ref bool bWriteResponsePending)
         {
             if (GetRegisterWriteOffset(s, memOffset) != 0)
@@ -174,7 +175,7 @@ namespace CidaRefImplCsharp
             }
         }
 
-        // *************************************************************************************
+
         public static bool GetDataResponsePending(UnmanagedMemoryStream s, long memOffset)
         {
             BinaryReader r = new BinaryReader(s);
@@ -182,7 +183,7 @@ namespace CidaRefImplCsharp
             return ((r.ReadUInt16() & (int)TagData.STS_RESPONSEPENDING) == (int)TagData.STS_RESPONSEPENDING ? true : false);
         }
 
-        // *************************************************************************************
+
         public static void SetReadResponse(UnmanagedMemoryStream s, long memOffset, Value value, bool error, DWORD errorCode, WORD quality, FileTime timeStamp)
         {
             if (GetRegisterReadOffset(s, memOffset) != 0)
@@ -192,7 +193,7 @@ namespace CidaRefImplCsharp
             SetDataResponsePending(s, memOffset + GetRegisterReadOffset(s, memOffset), true);
         }
 
-        // *************************************************************************************
+
         public static int SetReadResponseData(UnmanagedMemoryStream s, long memOffset, Value value, bool error, DWORD errorCode, WORD quality, FileTime timeStamp)
         {
             VALTYPE tType = GetDataValueType(s, memOffset);
@@ -217,7 +218,7 @@ namespace CidaRefImplCsharp
         }
 
 
-        // *************************************************************************************
+
         public static void SetWriteResponse(UnmanagedMemoryStream s, long memOffset, bool error, DWORD errorCode, WORD quality, FileTime timeStamp)
         {
             if (GetRegisterWriteOffset(s, memOffset) != 0)
@@ -227,7 +228,7 @@ namespace CidaRefImplCsharp
             SetDataResponsePending(s, memOffset + GetRegisterWriteOffset(s, memOffset), true);
         }
 
-        // *************************************************************************************
+
         public static int SetWriteResponseData(UnmanagedMemoryStream s, long memOffset, bool error, DWORD errorCode, WORD quality, FileTime timeStamp)
         {
             VALTYPE tType = GetDataValueType(s, memOffset);
@@ -250,7 +251,7 @@ namespace CidaRefImplCsharp
         }
 
 
-        // *************************************************************************************
+
         public static void SetDataError(UnmanagedMemoryStream s, long memOffset, DWORD errorCode, bool bFlag)
         {
             BinaryWriter w = new BinaryWriter(s);
@@ -273,7 +274,7 @@ namespace CidaRefImplCsharp
             w.Flush();
         }
 
-        // *************************************************************************************
+
         public static void SetDataQuality(UnmanagedMemoryStream s, long memOffset, WORD quality)
         {
             BinaryWriter w = new BinaryWriter(s);
@@ -282,7 +283,7 @@ namespace CidaRefImplCsharp
             w.Flush();
         }
 
-        // *************************************************************************************
+
         public static WORD GetDataStatus(UnmanagedMemoryStream s, long memOffset)
         {
             WORD val;
@@ -291,7 +292,7 @@ namespace CidaRefImplCsharp
             return (val = r.ReadUInt16());
         }
 
-        // *************************************************************************************
+
         public static WORD GetDataQuality(UnmanagedMemoryStream s, long memOffset)
         {
             WORD val;
@@ -300,7 +301,7 @@ namespace CidaRefImplCsharp
             return (val = r.ReadUInt16());
         }
 
-        // *************************************************************************************
+
         public static WORD GetReadRequest(UnmanagedMemoryStream s, long memOffset)
         {
             if (GetRegisterReadOffset(s, memOffset) == 0)
@@ -312,7 +313,7 @@ namespace CidaRefImplCsharp
             return (TagData.SMRC_NO_ERROR);
         }
 
-        // *************************************************************************************
+
         public static void SetDataRequestPending(UnmanagedMemoryStream s, long memOffset, bool bFlag)
         {
             BinaryWriter w = new BinaryWriter(s);
@@ -332,7 +333,7 @@ namespace CidaRefImplCsharp
             w.Flush();
         }
 
-        // *************************************************************************************
+
         static public int GetWriteRequestPending(UnmanagedMemoryStream s, long memOffset, ref bool bFlag)
         {
             if (GetRegisterWriteOffset(s, memOffset) == 0)
@@ -344,7 +345,7 @@ namespace CidaRefImplCsharp
             return (TagData.SMRC_NO_ERROR);
         }
 
-        // *************************************************************************************
+
         public static bool GetDataRequestPending(UnmanagedMemoryStream s, long memOffset)
         {
             BinaryReader r = new BinaryReader(s);
@@ -354,7 +355,7 @@ namespace CidaRefImplCsharp
             return (((status & TagData.STS_REQUESTPENDING) != TagData.FALSE) ? true : false);
         }
 
-        // *************************************************************************************
+
         static public int GetWriteRequest(UnmanagedMemoryStream s, long memOffset, ref Value value, ref WORD quality, ref FileTime timeStamp)
         {
             if (GetRegisterWriteOffset(s, memOffset) == 0)
@@ -367,7 +368,7 @@ namespace CidaRefImplCsharp
             return (nRC);
         }
 
-        // *************************************************************************************
+
         static public int GetWriteRequestData(UnmanagedMemoryStream s, long memOffset, ref Value value, ref WORD quality, ref FileTime timeStamp)
         {
 
@@ -383,7 +384,7 @@ namespace CidaRefImplCsharp
             return (TagData.SMRC_NO_ERROR);
         }
 
-        // *************************************************************************************
+
         static public int GetReadRequestPending(UnmanagedMemoryStream s, long memOffset, ref bool bFlag)
         {
             if (GetRegisterReadOffset(s, memOffset) == 0)
@@ -396,7 +397,7 @@ namespace CidaRefImplCsharp
         }
 
 
-        // *************************************************************************************
+
         static public int SetDataValue(UnmanagedMemoryStream s, long memOffset, Value value)
         {
             BinaryWriter w = new BinaryWriter(s);
@@ -424,7 +425,7 @@ namespace CidaRefImplCsharp
             return (TagData.SMRC_NO_ERROR);
         }
 
-        // *************************************************************************************
+
         static public void GetDataValue(UnmanagedMemoryStream s, long memOffset, ref Value value)
         {
             BinaryReader r = new BinaryReader(s);
@@ -458,7 +459,7 @@ namespace CidaRefImplCsharp
             value.SetValueFromArray();
         }
 
-        // *************************************************************************************
+
         public static void SetDataResponsePending(UnmanagedMemoryStream s, long memOffset, bool bFlag)
         {
             BinaryWriter w = new BinaryWriter(s);
@@ -478,7 +479,7 @@ namespace CidaRefImplCsharp
             w.Flush();
         }
 
-        // *************************************************************************************
+
         public static void SetDataTimestamp(UnmanagedMemoryStream s, long memOffset, FileTime timeStamp)
         {
             BinaryWriter w = new BinaryWriter(s);
@@ -488,7 +489,7 @@ namespace CidaRefImplCsharp
             w.Flush();
         }
 
-        // *************************************************************************************
+
         public static FileTime GetDataTimestamp(UnmanagedMemoryStream s, long memOffset)
         {
             FileTime ft;
@@ -499,7 +500,7 @@ namespace CidaRefImplCsharp
             return (ft);
         }
 
-        // *************************************************************************************
+
         static public int SetReadValueArrayStringSize(UnmanagedMemoryStream s, long memOffset, WORD wSize)
         {
             if (GetRegisterReadOffset(s, memOffset) == 0)
@@ -510,7 +511,7 @@ namespace CidaRefImplCsharp
             return (TagData.SMRC_NO_ERROR);
         }
 
-        // *************************************************************************************
+
         static public int SetWriteValueArrayStringSize(UnmanagedMemoryStream s, long memOffset, WORD wSize)
         {
             if (GetRegisterWriteOffset(s, memOffset) == 0)
@@ -521,13 +522,13 @@ namespace CidaRefImplCsharp
             return (TagData.SMRC_NO_ERROR);
         }
 
-        // *************************************************************************************
+
         public static void SetDataValueArrayStringSize(UnmanagedMemoryStream s, long memOffset, WORD wSize)
         {
             SetValueArrayStringSize(s, memOffset + DATA_VALUE_OFFSET, wSize);
         }
 
-        // *************************************************************************************
+
         public static void SetValueArrayStringSize(UnmanagedMemoryStream s, long memOffset, WORD wSize)
         {
             //The STRINGARRAY struct starts at the abExtValue offset of the VALUE struct
@@ -537,7 +538,7 @@ namespace CidaRefImplCsharp
             w.Flush();
         }
 
-        // *************************************************************************************
+
         public static WORD GetValueStringArraySize(UnmanagedMemoryStream s, DWORD sharedMemoryOffset)
         {
             long memOffset = (long)sharedMemoryOffset;
@@ -553,6 +554,6 @@ namespace CidaRefImplCsharp
             return (wVal);
         }
 
-    } // public class Register
+    }
 
-} // namespace CidaRefImplCsharp
+} 

@@ -1,9 +1,5 @@
 ﻿// **************************************************************************
-// File:  value.cs
 // Created:  11/30/2009 Copyright (c) 2009
-//
-// Description: A class which encapsulates functionality
-// pertaining to a tag value.
 //
 // **************************************************************************
 using System;
@@ -21,7 +17,10 @@ using LONG = System.Int32;
 
 namespace CidaRefImplCsharp
 {
-    // *************************************************************************************
+    /// <summary>
+    /// A class which encapsulates functionality
+    /// pertaining to a tag value.
+    /// </summary>
     public class Value
     {
         public const VALTYPE T_UNDEFINED = 0;
@@ -67,7 +66,8 @@ namespace CidaRefImplCsharp
         private double valueDate = DateTime.Now.ToOADate();
         private string valueString = ""; //default value is zero
 
-        // *************************************************************************************
+
+
         public Value(VALTYPE vType, WORD stringSize, int nRows, int nCols)
         {
 
@@ -125,20 +125,23 @@ namespace CidaRefImplCsharp
                 valueExtSize = 0;
             }
 
-        } //Value (VALTYPE vType, int nRows, int nCols)
+        } 
 
-        // *************************************************************************************
+
+
         public VALTYPE GetValueType()
         {
             return (valueType);
         }
 
-        // *************************************************************************************
-        // GetSysType ()
-        // Returns the system-defined Type for value types and objects. This is
-        // used to pass the tag value Type to function Array.CreateInstance () when
-        // dynamically creating tag arrays.
-        // *************************************************************************************
+
+        /// <summary>
+        /// Returns the system-defined Type for value types and objects. This is
+        /// used to pass the tag value Type to function Array.CreateInstance () when
+        /// dynamically creating tag arrays.
+        /// </summary>
+        /// <param name="vType"></param>
+        /// <returns></returns>
         private Type GetSysType(VALTYPE vType)
         {
 
@@ -170,10 +173,9 @@ namespace CidaRefImplCsharp
                     return (typeof(int));
             }
 
-        } // GetSysType(VALTYPE vType)
+        }
 
 
-        // *************************************************************************************
         public static int SizeOf(VALTYPE dataType)
         {
             dataType = (VALTYPE)(dataType & ~Value.T_ARRAY);
@@ -203,10 +205,9 @@ namespace CidaRefImplCsharp
                 default:
                     return (0);
             }
-        } // public static int SizeOf (DATATYPE eDataType)
+        }
 
 
-        // *************************************************************************************
         public static bool IsValidValueType(VALTYPE tType)
         {
             if ((tType & T_ARRAY) == T_ARRAY) // array bit set?
@@ -232,13 +233,12 @@ namespace CidaRefImplCsharp
                 default:
                     return (false);
             }
-        } // IsValidValueType (VALTYPE tType)
+        }
 
 
-        // *************************************************************************************
-        // Increment()
-        // Changes the value of a tag for demonstration purposes.
-        // *************************************************************************************
+        /// <summary>
+        /// Changes the value of a tag for demonstration purposes.
+        /// </summary>
         public void Increment()
         {
             switch (this.valueType)
@@ -362,9 +362,9 @@ namespace CidaRefImplCsharp
                                         {
                                             break;
                                         }
-                                } // switch
-                            } // for (int j
-                        } // for (int i
+                                }
+                            } 
+                        }
                     }
                     else
                     {
@@ -372,16 +372,16 @@ namespace CidaRefImplCsharp
                     }
                     break;
 
-            } // switch (valueType)
+            } 
 
-        } // Increment ()
+        }
 
-        // *************************************************************************************
-        // GetArrayFromValue ()
-        // Translates the tag data value into a byte array that may be written to
-        // the shared memory stream. Returns an 8-byte array reference for basic types
-        // and a dynamically-sized byte array reference for strings and array types.
-        // *************************************************************************************
+        /// <summary>
+        /// Translates the tag data value into a byte array that may be written to
+        /// the shared memory stream. Returns an 8-byte array reference for basic types
+        /// and a dynamically-sized byte array reference for strings and array types.
+        /// </summary>
+        /// <returns></returns>
         public byte[] GetArrayFromValue()
         {
             byte[] a8byte = new byte[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -514,13 +514,12 @@ namespace CidaRefImplCsharp
                 Array.Copy(aTmp, a8byte, aTmp.Length);
                 return (a8byte);
             }
-        } // GetArrayFromValue ()
+        }
 
-        // *************************************************************************************
-        // SetValueFromArray ()
-        // Converts the byte array read from shared memory to the appropriate tag
-        // value.
-        // *************************************************************************************
+        /// <summary>
+        /// Converts the byte array read from shared memory to the appropriate tag
+        /// value.
+        /// </summary>
         public void SetValueFromArray()
         {
             byte[] a8byte = new byte[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -699,19 +698,19 @@ namespace CidaRefImplCsharp
                                             offset += this.valueStringSize * sizeof(char);
                                             break;
                                         }
-                                } // switch
-                            } // for (int j
-                        } // for (int i
+                                }
+                            }
+                        }
 
-                    } // if array
+                    }
                     else
                     {
                         break;
                     }
                     break;
             }
-        } // SetValueFromArray ()
+        }
 
-    } // public class Value
+    }
 
-} // namespace CidaRefImplCsharp
+}

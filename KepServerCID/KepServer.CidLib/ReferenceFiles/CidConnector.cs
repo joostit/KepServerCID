@@ -10,7 +10,6 @@
 // class library references
 using System;
 
-// common namespace for related files in project
 namespace CidaRefImplCsharp
 {
 
@@ -31,9 +30,10 @@ namespace CidaRefImplCsharp
             MemInterface memInterface = new MemInterface();
             memInterface.Start(args, strConfigName, strApplicationDir, exportConfig);
 
-        } //Main ()
+        }
 
-        // *************************************************************************************
+
+
         private void GetConfigInfo(ref string strConfigName, ref string strApplicationDir, string[] args, ref bool exportConfig)
         {
 
@@ -69,8 +69,8 @@ namespace CidaRefImplCsharp
             // Get the application's name without the .exe extension
             strConfigName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
 
-        } // GetConfigInfo ()
+        } 
 
-    } // class AppMain
+    } 
 
-} //namespace CidaRefImplCsharp
+}
