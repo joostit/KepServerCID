@@ -20,12 +20,12 @@ using DWORD = System.UInt32;
 using VALTYPE = System.UInt16;
 using KepServer.CidLib.Types;
 
-namespace CidaRefImplCsharp
+namespace KepServer.CidLib.Internals
 {
     /// <summary>
     /// The Register class is used for accessing shared memory.
     /// </summary>
-    public static class Register
+    internal static class Register
     {
         private const int READ_OFFSET = 0;
         private const int WRITE_OFFSET = 4;

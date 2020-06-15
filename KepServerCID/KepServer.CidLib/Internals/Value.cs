@@ -15,7 +15,7 @@ using VALTYPE = System.UInt16;
 using BOOL = System.UInt16;
 using LONG = System.Int32;
 
-namespace CidaRefImplCsharp
+namespace KepServer.CidLib.Internals
 {
     /// <summary>
     /// A class which encapsulates functionality

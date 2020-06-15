@@ -23,7 +23,7 @@ using DWORD = System.UInt32;
 using KepServer.CidLib.Types;
 using KepServer.CidLib.Interop;
 
-namespace CidaRefImplCsharp
+namespace KepServer.CidLib.Internals
 {
     public class Device
     {
@@ -40,7 +40,7 @@ namespace CidaRefImplCsharp
         private static int nextTagIndex;		// Next tag to provide to GetNextTag
 
        
-        public Device(DeviceEntry tDeviceEntry, MemInterface memInterface)
+        internal Device(DeviceEntry tDeviceEntry, MemInterface memInterface)
         {
             this.memInterface = memInterface;
             devName = tDeviceEntry.strName;

@@ -10,7 +10,6 @@ using WORD = System.UInt16;
 using DWORD = System.UInt32;
 using VALTYPE = System.UInt16;
 using BOOL = System.UInt16;
-using CidaRefImplCsharp;
 
 namespace KepServer.CidLib.Types
 {

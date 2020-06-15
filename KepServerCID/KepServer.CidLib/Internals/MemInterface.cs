@@ -35,19 +35,20 @@ using WORD = System.UInt16;
 using DWORD = System.UInt32;
 using KepServer.CidLib;
 using KepServer.CidLib.Types;
+using KepServer.CidLib.Tags;
 
-
-namespace CidaRefImplCsharp
+namespace KepServer.CidLib.Internals
 {
 
     // This application uses a pointer to unmanaged (shared) memory.
     // You must enable "Allow unsafe code" in project build properties.
-    public unsafe class MemInterface
+    internal unsafe class MemInterface
     {
+
 
         // Define the devices that we will use.
         // For test purposes, you may comment out a device you do not wish to create.
-        private DeviceEntry[] DeviceTable =
+        private List<DeviceEntry> deviceTable = new List<DeviceEntry>()
             {
             //                         Name,				ID
 			new DeviceEntry ("Device1",              "1"),
@@ -76,9 +77,18 @@ namespace CidaRefImplCsharp
         public bool exitFlag = false;
 
 
+        private TagsCollection tagsInfo;
 
-        public void Start(string[] args, string strConfigName, string strApplicationDir, bool exportConfig)
+        public MemInterface(TagsCollection tagsInfo)
         {
+            this.tagsInfo = tagsInfo;
+        }
+
+        public void Start(string strConfigName, string strApplicationDir, bool exportConfig)
+        {
+
+            LoadTagsInfo();
+
             //Set up a mutex to control access to shared memory
             SetupMutex(strConfigName);
 
@@ -88,7 +98,7 @@ namespace CidaRefImplCsharp
             // Load the TAGENTRY lists for each device.
             // A device may have no tags defined at startup.
             // At startup, shared memory is configured only for defined tags.
-            LoadTagEntryLists();
+            //LoadTagEntryLists();
 
             // Load the device and tag tables into lists to initialize shared memory
             LoadTables();
@@ -98,7 +108,6 @@ namespace CidaRefImplCsharp
             {
                 StartExportConfiguration(strApplicationDir, strConfigName);
             }
-
             else
             {
                 //The main process thread will enter an infinite loop until signaled to break.
@@ -121,16 +130,41 @@ namespace CidaRefImplCsharp
 
         }
 
+        private void LoadTagsInfo()
+        {
+
+            tagEntryList = new List<TagEntry>[tagsInfo.Devices.Count];
+            deviceTable = new List<DeviceEntry>();
+
+            int deviceIndex = 0;
+            foreach (DeviceDefinition deviceDef in tagsInfo.Devices.Values)
+            {
+                DeviceEntry device = new DeviceEntry(deviceDef.Name, deviceDef.Id);
+                deviceTable.Add(device);
+                
+                List<TagEntry> deviceTags = new List<TagEntry>();
+
+                foreach(TagDefinition tagDef in deviceDef.Tags.Values)
+                {
+                    deviceTags.Add(tagDef.ToTagEntry());
+                }
+
+                tagEntryList[deviceIndex] = deviceTags;
+
+                device.tagEntryList = deviceTags;
+                deviceIndex++;
+            }
+        }
 
         public void LoadTagEntryLists()
         {
             int deviceNum;
             //match the tags to the devices in your device table
 
-            tagEntryList = new List<TagEntry>[DeviceTable.Count()];
+            tagEntryList = new List<TagEntry>[deviceTable.Count()];
 
             deviceNum = 0; // device 1 (zero-based)
-            if (deviceNum >= 0 && deviceNum < DeviceTable.Count())
+            if (deviceNum >= 0 && deviceNum < deviceTable.Count())
             {
 
                 //always instantiate the TAGENTRY list
@@ -163,11 +197,11 @@ namespace CidaRefImplCsharp
                 tagEntryList[deviceNum].Add(new TagEntry("StringArray", 15, 1, 5, Value.T_STRING | Value.T_ARRAY, AccessType.READWRITE, "Example string array tag", ""));
 
                 //always assign the device TAGENTRY list
-                DeviceTable[deviceNum].tagEntryList = tagEntryList[deviceNum];
+                deviceTable[deviceNum].tagEntryList = tagEntryList[deviceNum];
             }
 
             deviceNum = 1; // device 2 (zero-based)
-            if (deviceNum >= 0 && deviceNum < DeviceTable.Count())
+            if (deviceNum >= 0 && deviceNum < deviceTable.Count())
             {
 
                 //always instantiate the TAGENTRY list
@@ -180,7 +214,8 @@ namespace CidaRefImplCsharp
                 tagEntryList[deviceNum].Add(new TagEntry("Acceleration", 0, 1, 5, Value.T_FLOAT, AccessType.READONLY, "", "X Axis"));
 
                 //always assign the device TAGENTRY list
-                DeviceTable[deviceNum].tagEntryList = tagEntryList[deviceNum];
+
+                deviceTable[deviceNum].tagEntryList = tagEntryList[deviceNum];
             }
 
         } 
@@ -208,17 +243,17 @@ namespace CidaRefImplCsharp
                     DWORD nextAvailableDeviceOffset = 0;
                     DWORD nextAvailableTagOffset = 0;
 
-                    while (nDeviceTableIndex < DeviceTable.Length)
+                    while (nDeviceTableIndex < deviceTable.Count)
                     {
                         // Create new Device
-                        Device device = new Device((DeviceEntry)DeviceTable[nDeviceTableIndex], this);
+                        Device device = new Device((DeviceEntry)deviceTable[nDeviceTableIndex], this);
 
                         if (device.Equals(null))
                         {
                             break;
                         }
 
-                        if (DeviceTable[nDeviceTableIndex].tagEntryList.Count() == 0)
+                        if (deviceTable[nDeviceTableIndex].tagEntryList.Count() == 0)
                         {
                             ++nDeviceTableIndex;
                             continue;
@@ -238,7 +273,7 @@ namespace CidaRefImplCsharp
                         // Add device to device set
                         deviceSet.Add(device);
 
-                        foreach (TagEntry tagEntry in DeviceTable[nDeviceTableIndex].tagEntryList)
+                        foreach (TagEntry tagEntry in deviceTable[nDeviceTableIndex].tagEntryList)
                         {
                             nextAvailableTagOffset = device.AddTag(tagEntry, nextAvailableTagOffset);
                         }
@@ -682,7 +717,7 @@ namespace CidaRefImplCsharp
             Thread quitThread = new Thread(quitThreadClass.RuntimeThreadProc);
             quitThread.Name = "Quit_Loop";
             quitThread.Start();
-        } // StartQuitThread ()
+        } 
 
         // **************************************************************************
         // GetNextTag

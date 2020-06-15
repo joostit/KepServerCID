@@ -8,54 +8,41 @@
 //
 // **************************************************************************
 // class library references
+using KepServer.CidLib.Internals;
+using KepServer.CidLib.Tags;
 using System;
 
-namespace CidaRefImplCsharp
+namespace KepServer.CidLib
 {
+
 
     // This application uses a pointer to unmanaged (shared) memory.
     // To build, you must enable "Allow unsafe code" in project build properties.
     public class CidConnector
     {
-        public void Run(string[] args)
+        private MemInterface memInterface;
+
+
+
+        public void Run(TagsCollection tagsInfo, bool exportConfig)
         {
-            bool exportConfig = false;
             string strConfigName = "";
             string strApplicationDir = "";
 
             // Get application info for naming the shared memory file and mutex
-            GetConfigInfo(ref strConfigName, ref strApplicationDir, args, ref exportConfig);
+            GetConfigInfo(ref strConfigName, ref strApplicationDir);
 
             // Start the interface to shared memory
-            MemInterface memInterface = new MemInterface();
-            memInterface.Start(args, strConfigName, strApplicationDir, exportConfig);
+            memInterface = new MemInterface(tagsInfo);
+            memInterface.Start(strConfigName, strApplicationDir, exportConfig);
+
 
         }
 
 
 
-        private void GetConfigInfo(ref string strConfigName, ref string strApplicationDir, string[] args, ref bool exportConfig)
+        private void GetConfigInfo(ref string strConfigName, ref string strApplicationDir)
         {
-
-            // Parse command line
-            if (args.Length > 0)
-            {
-
-                // Export Configuration
-                if (args[0] == "-exportconfig")
-                {
-                    exportConfig = true;
-                }
-
-                else
-                {
-                    string msg = "Invalid argument provided. Usage: " +
-                        System.Reflection.Assembly.GetExecutingAssembly().GetName().Name +
-                        " [-exportconfig]";
-                    Console.WriteLine(msg);
-                }
-            }
-
             // Important: The following will generate a Configuration Name based on the application's binary file name.
             // This is not a requirement and can be anything the vendor desires.
 

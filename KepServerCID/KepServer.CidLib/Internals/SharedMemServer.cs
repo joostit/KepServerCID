@@ -22,9 +22,9 @@ using KepServer.CidLib.Interop.WinBASE;
 using KepServer.CidLib.Interop;
 using KepServer.CidLib.Interop.WinNT;
 
-namespace CidaRefImplCsharp
+namespace KepServer.CidLib.Internals
 {
-    public class SharedMemServer : IDisposable
+    internal class SharedMemServer : IDisposable
     {
 
         private static readonly IntPtr NoFileHandle = new IntPtr(-1);

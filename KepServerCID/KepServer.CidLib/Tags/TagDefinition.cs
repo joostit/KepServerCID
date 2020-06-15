@@ -1,0 +1,53 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using WORD = System.UInt16;
+using DWORD = System.UInt32;
+using VALTYPE = System.UInt16;
+using KepServer.CidLib.Types;
+using Microsoft.VisualBasic;
+using System.Text.RegularExpressions;
+
+namespace KepServer.CidLib.Tags
+{
+    public abstract class TagDefinition
+    {
+
+        public string Name { get; set; }
+
+        internal WORD StringSize { get; set; }
+
+        internal WORD ArrayRows { get; set; }
+
+        internal WORD ArrayCols { get; set; }
+
+        internal VALTYPE ValueType { get; set; } 
+
+        internal AccessType Access { get; set; }
+        
+        internal string Description { get; set; }
+
+        internal string GroupName { get; set; }
+
+        public TagDefinition(string name, WORD stringSize, WORD arrayRows,
+            WORD arrayCols, VALTYPE valueType, AccessType access,
+            string description, string groupName)
+        {
+            this.Name = name;
+            this.StringSize = stringSize;
+            this.ArrayRows = arrayRows;
+            this.ArrayCols = arrayCols;
+            this.ValueType = valueType;
+            this.Access = access;
+            this.Description = description;
+            this.GroupName = groupName;
+        }
+       
+
+        internal TagEntry ToTagEntry()
+        {
+            return new TagEntry(Name, StringSize, ArrayRows, ArrayCols, ValueType, Access, Description, GroupName);
+        }
+
+    }
+}

@@ -1,9 +1,8 @@
-﻿using CidaRefImplCsharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace KepServer.CidLib
+namespace KepServer.CidLib.Internals
 {
     internal class QuitThread
     {

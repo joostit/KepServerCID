@@ -12,7 +12,7 @@ using VALTYPE = System.UInt16;
 using BOOL = System.UInt16;
 using KepServer.CidLib.Types;
 
-namespace CidaRefImplCsharp
+namespace KepServer.CidLib.Internals
 {
     /// <summary>
     /// Description:  Defines the Tag class.  The Tag class includes the
@@ -58,7 +58,7 @@ namespace CidaRefImplCsharp
         }
 
 
-        public Tag(MemInterface memInterface, ref Device device, TagEntry tTagEntry, DWORD dwRelativeOffset, DWORD dwParentOffset)
+        internal Tag(MemInterface memInterface, ref Device device, TagEntry tTagEntry, DWORD dwRelativeOffset, DWORD dwParentOffset)
         {
             tagDevice = device;
 
