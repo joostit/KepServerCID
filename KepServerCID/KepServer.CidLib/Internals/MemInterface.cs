@@ -42,7 +42,7 @@ namespace KepServer.CidLib.Internals
 
     // This application uses a pointer to unmanaged (shared) memory.
     // You must enable "Allow unsafe code" in project build properties.
-    internal unsafe class MemInterface
+    internal unsafe class MemInterface : IDisposable
     {
 
 
@@ -78,6 +78,11 @@ namespace KepServer.CidLib.Internals
         public MemInterface(TagsCollection tagsInfo)
         {
             this.Tags = tagsInfo;
+        }
+
+        ~MemInterface()
+        {
+            Dispose();
         }
 
         public void Start(string strConfigName, string strApplicationDir, bool exportConfig)
@@ -146,70 +151,6 @@ namespace KepServer.CidLib.Internals
                 deviceIndex++;
             }
         }
-
-        public void LoadTagEntryLists()
-        {
-            int deviceNum;
-            //match the tags to the devices in your device table
-
-            tagEntryList = new List<TagEntry>[deviceTable.Count()];
-
-            deviceNum = 0; // device 1 (zero-based)
-            if (deviceNum >= 0 && deviceNum < deviceTable.Count())
-            {
-
-                //always instantiate the TAGENTRY list
-                tagEntryList[deviceNum] = new List<TagEntry>();
-
-                // For test purposes, you may comment out all tags you do not wish to create
-                //												Name,			StringSize,	ArrayRows,	ArrayCols,          Datatype,		                ReadWrite,			         Description,			    Group
-                tagEntryList[deviceNum].Add(new TagEntry("BoolTag", 0, 0, 0, ValueTypes.T_BOOL, AccessType.READWRITE, "Example boolean tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("CharTag", 0, 0, 0, ValueTypes.T_CHAR, AccessType.READWRITE, "Example signed 8 bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("ByteTag", 0, 0, 0, ValueTypes.T_BYTE, AccessType.READWRITE, "Example unsigned 8 bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("ShortTag", 0, 0, 0, ValueTypes.T_SHORT, AccessType.READWRITE, "Example signed 16-bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("WordTag", 0, 0, 0, ValueTypes.T_WORD, AccessType.READWRITE, "Example unsigned 16-bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("LongTag", 0, 0, 0, ValueTypes.T_LONG, AccessType.READWRITE, "Example signed 32-bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("DWordTag", 0, 0, 0, ValueTypes.T_DWORD, AccessType.READWRITE, "Example unsigned 32-bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("FloatTag", 0, 0, 0, ValueTypes.T_FLOAT, AccessType.READWRITE, "Example 32-bit float tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("DoubleTag", 0, 0, 0, ValueTypes.T_DOUBLE, AccessType.READWRITE, "Example double 64-bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("DateTag", 0, 0, 0, ValueTypes.T_DATE, AccessType.READWRITE, "Example date tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("StringTag", 15, 0, 0, ValueTypes.T_STRING, AccessType.READWRITE, "Example string tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("ReadOnlyStringTag", 15, 0, 0, ValueTypes.T_STRING, AccessType.READONLY, "Example read-only string tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("BoolArray", 0, 1, 5, ValueTypes.T_BOOL | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example bool array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("CharArray", 0, 2, 5, ValueTypes.T_CHAR | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example char array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("ByteArray", 0, 2, 5, ValueTypes.T_BYTE | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example byte array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("ShortArray", 0, 2, 5, ValueTypes.T_SHORT | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example short array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("WordArray", 0, 2, 5, ValueTypes.T_WORD | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example word array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("LongArray", 0, 2, 5, ValueTypes.T_LONG | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example long array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("DWordArray", 0, 2, 5, ValueTypes.T_DWORD | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example dword array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("FloatArray", 0, 1, 5, ValueTypes.T_FLOAT | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example float array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("DoubleArray", 0, 1, 5, ValueTypes.T_DOUBLE | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example double array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("DateArray", 0, 1, 5, ValueTypes.T_DATE | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example date array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("StringArray", 15, 1, 5, ValueTypes.T_STRING | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example string array tag", ""));
-
-                //always assign the device TAGENTRY list
-                deviceTable[deviceNum].tagEntryList = tagEntryList[deviceNum];
-            }
-
-            deviceNum = 1; // device 2 (zero-based)
-            if (deviceNum >= 0 && deviceNum < deviceTable.Count())
-            {
-
-                //always instantiate the TAGENTRY list
-                tagEntryList[deviceNum] = new List<TagEntry>();
-
-                // For test purposes, you may comment out all tags you do not wish to create
-                tagEntryList[deviceNum].Add(new TagEntry("FaultString", 100, 0, 0, ValueTypes.T_STRING, AccessType.READONLY, "", "X Axis\\Status"));
-                tagEntryList[deviceNum].Add(new TagEntry("ServoStatus", 0, 0, 0, ValueTypes.T_DWORD, AccessType.READONLY, "", "X Axis\\Status"));
-                tagEntryList[deviceNum].Add(new TagEntry("Position", 0, 0, 0, ValueTypes.T_FLOAT, AccessType.READWRITE, "", "X Axis"));
-                tagEntryList[deviceNum].Add(new TagEntry("Acceleration", 0, 1, 5, ValueTypes.T_FLOAT, AccessType.READONLY, "", "X Axis"));
-
-                //always assign the device TAGENTRY list
-
-                deviceTable[deviceNum].tagEntryList = tagEntryList[deviceNum];
-            }
-
-        } 
 
 
         public void LoadTables()
@@ -344,10 +285,10 @@ namespace KepServer.CidLib.Internals
                         // Read means: CIDA --> Kepware
                         // Important: In a commercial application, this is where you would send the read request to the device
                         // Since data is simulated, the read response is immediately available.
-                        if (refTag.IsWriteable() == true)
-                        {
-                            refTag.tagReadData.value.Increment();   // For simulation purposes, bump current value
-                        }
+                        //if (refTag.IsWriteable() == true)
+                        //{
+                        //    refTag.tagReadData.value.Increment();   // For simulation purposes, bump current value
+                        //}
                         refTag.tagReadData.errorCode = 0;
                         refTag.tagReadData.quality = TagData.OPC_QUALITY_GOOD_NON_SPECIFIC;
                         GetFtNow(ref refTag.tagReadData.timeStamp);
@@ -504,6 +445,9 @@ namespace KepServer.CidLib.Internals
                     }
                     pSharedMemoryBaseMem = null;
                 }
+
+                // Force a context swith to prevent the while-loop from spinning too fast
+                Thread.Sleep(1);
             } 
 
             // The only time we should fall out of this function is if the quit event is set
@@ -635,8 +579,6 @@ namespace KepServer.CidLib.Internals
             mutex = new Mutex(true, strName, out createdNewMutex);
             mutex.SetAccessControl(mutexSecurity);
 
-
-
             if (createdNewMutex == true)
             {
                 //System.Console.WriteLine ("Success: created mutex {0}", strName);
@@ -703,6 +645,21 @@ namespace KepServer.CidLib.Internals
             ft.dwHighDateTime = (UInt32)(hFT1 >> 32);
         }
 
+
+        private bool isDisposed = false;
+
+        public void Dispose()
+        {
+            if (!isDisposed)
+            {
+                isDisposed = true;
+                if (mutex != null)
+                {
+                    mutex.Dispose();
+                }
+                GC.SuppressFinalize(this);
+            }
+        }
     } 
 
 } 

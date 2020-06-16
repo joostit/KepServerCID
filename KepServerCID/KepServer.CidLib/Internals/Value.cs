@@ -554,9 +554,10 @@ namespace KepServer.CidLib.Internals
                     break;
 
                 case ValueTypes.T_DATE:
+                    this.valueDate = BitConverter.ToDouble(a8byte, 0);
                     //writing to date not currently supported
                     //this.valueDate = BitConverter.ToInt64 (a8byte, 0);
-                    throw new NotSupportedException("writing to date not currently supported");
+                    break;
 
                 case ValueTypes.T_STRING:
                     {

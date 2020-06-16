@@ -13,11 +13,21 @@ namespace KepServer.CidLib.Tags
         {
             get
             {
-                return base.CidTag.tagReadData.value.valueWord;
+                if (CidTag != null)
+                {
+                    return base.CidTag.tagReadData.value.valueWord;
+                }
+                else
+                {
+                    return 0;
+                }
             }
             set
             {
-                base.CidTag.tagReadData.value.valueWord = value;
+                if (CidTag != null)
+                {
+                    base.CidTag.tagReadData.value.valueWord = value;
+                }
             }
         }
 

@@ -13,6 +13,8 @@ namespace KepServer.CidLib.Tags
 {
     public abstract class TagApiBase
     {
+        public event EventHandler NewDataAvailable;
+
         internal Tag CidTag { get; set; }
 
         public string Name { get; set; }
@@ -54,6 +56,12 @@ namespace KepServer.CidLib.Tags
         internal void SetInternalTag(Tag cidTag)
         {
             CidTag = cidTag;
+            CidTag.NewDataAvailable += (s, e) => OnNewDataAvailable();
+        }
+
+        protected virtual void OnNewDataAvailable()
+        {
+            NewDataAvailable.Invoke(this, EventArgs.Empty);
         }
     }
 }

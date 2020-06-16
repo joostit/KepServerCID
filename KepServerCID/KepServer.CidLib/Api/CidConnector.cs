@@ -43,16 +43,23 @@ namespace KepServer.CidLib
 
             cidRunnerThread = new Thread((o) =>
             {
-                // Get application info for naming the shared memory file and mutex
-                GetConfigInfo(ref strConfigName, ref strApplicationDir);
+                try
+                {
+                    // Get application info for naming the shared memory file and mutex
+                    GetConfigInfo(ref strConfigName, ref strApplicationDir);
 
-                // Start the interface to shared memory
-                memInterface = new MemInterface(tagsInfo);
-                memInterface.Start(strConfigName, strApplicationDir, false);
+                    // Start the interface to shared memory
+                    memInterface = new MemInterface(tagsInfo);
+                    memInterface.Start(strConfigName, strApplicationDir, false);
+                }
+                finally
+                {
+                    memInterface?.Dispose();
+                }
             });
 
             cidRunnerThread.Name = "CID_Runner";
-            cidRunnerThread.IsBackground = true;
+            cidRunnerThread.IsBackground = false;   // Don't make into a background thread because we might omit to release the mutex
             cidRunnerThread.Start();
         }
 
@@ -65,15 +72,22 @@ namespace KepServer.CidLib
 
         public void ExportConfiguration(TagsCollection tagsInfo)
         {
-            string strConfigName = "";
-            string strApplicationDir = "";
+            try
+            {
+                string strConfigName = "";
+                string strApplicationDir = "";
 
-            // Get application info for naming the shared memory file and mutex
-            GetConfigInfo(ref strConfigName, ref strApplicationDir);
+                // Get application info for naming the shared memory file and mutex
+                GetConfigInfo(ref strConfigName, ref strApplicationDir);
 
-            // Start the interface to shared memory
-            memInterface = new MemInterface(tagsInfo);
-            memInterface.Start(strConfigName, strApplicationDir, true);
+                // Start the interface to shared memory
+                memInterface = new MemInterface(tagsInfo);
+                memInterface.Start(strConfigName, strApplicationDir, true);
+            }
+            finally
+            {
+                memInterface?.Dispose();
+            }
         }
 
 

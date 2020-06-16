@@ -9,6 +9,32 @@ namespace KepServer.CidLib.Tags
     public class StringTag : TagApiBase
     {
 
+        public string Value
+        {
+            get
+            {
+                if (CidTag != null)
+                {
+                    return base.CidTag.tagReadData.value.valueString;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            set
+            {
+                if (CidTag != null)
+                {
+                    if(value.Length > base.CidTag.tagReadData.value.valueStringSize)
+                    {
+                        throw new InvalidOperationException("String length too long for tag");
+                    }
+                    base.CidTag.tagReadData.value.valueString = value;
+                }
+            }
+        }
+
         public StringTag(string name, AccessType accessType, string description, string groupName, int maxLength)
             : base(name, (ushort) maxLength, 0, 0, ValueTypes.T_STRING, accessType, description, groupName)
         {

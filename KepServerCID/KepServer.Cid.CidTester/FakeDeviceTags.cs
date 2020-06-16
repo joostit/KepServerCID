@@ -35,8 +35,8 @@ namespace KepServer.Cid.CidTester
         public FakeDeviceTags()
         {
             CreateTags();
+            HookUpDataEvents();
         }
-
 
         private void CreateTags()
         {
@@ -65,6 +65,22 @@ namespace KepServer.Cid.CidTester
                 .AddTag(DoubleArrayTag = new DoubleArrayTag("aDoubleArrayTag", 3, 4, "a Double array tag of 3 x 4"))
                 .AddTag(DateArrayTag = new DateArrayTag("aDateArrayTag", 3, 4, "a Date array tag of 3 x 4"))
                 .AddTag(StringArrayTag = new StringArrayTag("aStringArrayTag", 5, "a String array tag 5 strings"));
+        }
+
+
+        private void HookUpDataEvents()
+        {
+            WordTag.NewDataAvailable += (s, e) => Console.WriteLine($"WordTag: New data written: {WordTag.Value}");
+            BoolTag.NewDataAvailable += (s, e) => Console.WriteLine($"BoolTag: New data written: {BoolTag.Value}");
+            CharTag.NewDataAvailable += (s, e) => Console.WriteLine($"CharTag: New data written: {CharTag.Value}");
+            ByteTag.NewDataAvailable += (s, e) => Console.WriteLine($"ByteTag: New data written: {ByteTag.Value}");
+            ShortTag.NewDataAvailable += (s, e) => Console.WriteLine($"ShortTag: New data written: {ShortTag.Value}");
+            LongTag.NewDataAvailable += (s, e) => Console.WriteLine($"LongTag: New data written: {LongTag.Value}");
+            DWordTag.NewDataAvailable += (s, e) => Console.WriteLine($"DWordTag: New data written: {DWordTag.Value}");
+            FloatTag.NewDataAvailable += (s, e) => Console.WriteLine($"FloatTag: New data written: {FloatTag.Value}");
+            DoubleTag.NewDataAvailable += (s, e) => Console.WriteLine($"DoubleTag: New data written: {DoubleTag.Value}");
+            DateTag.NewDataAvailable += (s, e) => Console.WriteLine($"DateTag: New data written: {DateTag.Value}");
+            StringTag.NewDataAvailable += (s, e) => Console.WriteLine($"StringTag: New data written: {StringTag.Value}");
         }
 
 

@@ -8,6 +8,27 @@ namespace KepServer.CidLib.Tags
 {
     public class DoubleTag : TagApiBase
     {
+        public double Value
+        {
+            get
+            {
+                if (CidTag != null)
+                {
+                    return base.CidTag.tagReadData.value.valueDouble;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            set
+            {
+                if (CidTag != null)
+                {
+                    base.CidTag.tagReadData.value.valueDouble = value;
+                }
+            }
+        }
 
         public DoubleTag(string name, AccessType accessType, string description, string groupName)
             : base(name, 0, 0, 0, ValueTypes.T_DOUBLE, accessType, description, groupName)

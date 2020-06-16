@@ -8,6 +8,29 @@ namespace KepServer.CidLib.Tags
 {
     public class CharTag : TagApiBase
     {
+
+        public sbyte Value
+        {
+            get
+            {
+                if (CidTag != null)
+                {
+                    return base.CidTag.tagReadData.value.valueChar;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            set
+            {
+                if (CidTag != null)
+                {
+                    base.CidTag.tagReadData.value.valueChar = value;
+                }
+            }
+        }
+
         public CharTag(string name, AccessType accessType, string description, string groupName)
             : base(name, 0, 0, 0, ValueTypes.T_CHAR, accessType, description, groupName)
         {
