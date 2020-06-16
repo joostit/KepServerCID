@@ -6,31 +6,8 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class DWordTag : TagApiBase
+    public class DWordTag : ValueTag<uint>
     {
-
-        public uint Value
-        {
-            get
-            {
-                if (CidTag != null)
-                {
-                    return base.CidTag.tagReadData.value.valueDword;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            set
-            {
-                if (CidTag != null)
-                {
-                    base.CidTag.tagReadData.value.valueDword = value;
-                }
-            }
-        }
-
         public DWordTag(string name, AccessType accessType, string description, string groupName)
             : base(name, 0, 0, 0, ValueTypes.T_DWORD, accessType, description, groupName)
         {
@@ -43,5 +20,14 @@ namespace KepServer.CidLib.Tags
 
         }
 
+        protected override void SaveValueToCidTag(uint value)
+        {
+            base.CidTag.tagReadData.value.valueDword = value;
+        }
+
+        protected override uint GetValueFromCidTag()
+        {
+            return base.CidTag.tagReadData.value.valueDword;
+        }
     }
 }

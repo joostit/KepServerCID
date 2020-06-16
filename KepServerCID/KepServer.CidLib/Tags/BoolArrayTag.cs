@@ -6,13 +6,13 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class BoolArrayTag : TagApiBase
+    public class BoolArrayTag : ArrayTag
     {
 
         public BoolArrayTag(string name, int rows, int columns, AccessType accessType, string description, string groupName)
             : base(name, 0, (ushort) rows, (ushort) columns, ValueTypes.T_BOOL | ValueTypes.T_ARRAY, accessType, description, groupName)
         {
-
+            //toCidConverter = new Converter<bool, uint>(toCidType);
         }
 
         public BoolArrayTag(string name, int rows, int columns, string description)
@@ -20,5 +20,10 @@ namespace KepServer.CidLib.Tags
         {
 
         }
+
+
+
+
+
     }
 }

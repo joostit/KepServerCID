@@ -6,30 +6,8 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class FloatTag : TagApiBase
+    public class FloatTag : ValueTag<float>
     {
-
-        public float Value
-        {
-            get
-            {
-                if (CidTag != null)
-                {
-                    return base.CidTag.tagReadData.value.valueFloat;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            set
-            {
-                if (CidTag != null)
-                {
-                    base.CidTag.tagReadData.value.valueFloat = value;
-                }
-            }
-        }
 
         public FloatTag(string name, AccessType accessType, string description, string groupName)
             : base(name, 0, 0, 0, ValueTypes.T_FLOAT, accessType, description, groupName)
@@ -43,5 +21,14 @@ namespace KepServer.CidLib.Tags
 
         }
 
+        protected override void SaveValueToCidTag(float value)
+        {
+            base.CidTag.tagReadData.value.valueFloat = value;
+        }
+
+        protected override float GetValueFromCidTag()
+        {
+            return base.CidTag.tagReadData.value.valueFloat;
+        }
     }
 }

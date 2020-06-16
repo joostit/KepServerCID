@@ -366,6 +366,13 @@ namespace KepServer.CidLib.Internals
 
         }
 
+
+        public void SetArray<T>(T[,] values)
+        {
+            Array.Copy(values, valueDynamicArray, values.Length);
+            //this.valueDynamicArray.SetValue(value, row, col);
+        }
+
         /// <summary>
         /// Translates the tag data value into a byte array that may be written to
         /// the shared memory stream. Returns an 8-byte array reference for basic types

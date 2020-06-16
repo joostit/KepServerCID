@@ -14,14 +14,14 @@ namespace KepServer.Cid.CidTester
             bool run = true;
             Console.WriteLine("Started");
 
-            //FakeDeviceTags myDeviceInKep = new FakeDeviceTags();
+            FakeDeviceTags myDeviceInKep = new FakeDeviceTags();
 
             ThreeShapeScannerCid scannerCid = new ThreeShapeScannerCid();
 
             CidConnector connector = new CidConnector();
 
-            connector.ExportConfiguration(scannerCid.Tags);
-            //connector.Start(scannerCid.Tags);
+            //connector.ExportConfiguration(myDeviceInKep.Tags);
+            connector.Start(myDeviceInKep.Tags);
 
 
             Task inputWaiter = Task.Run(() =>
@@ -31,19 +31,36 @@ namespace KepServer.Cid.CidTester
                 run = false;
             });
 
-            ushort val = 0;
+            byte val = 0;
             while (run)
             {
                 Thread.Sleep(1000);
-                scannerCid.JobCount.Value = val++;
-                scannerCid.IsRunning.Value = val % 2 == 0;
-                //myDeviceInKep.WordTag.Value = val++;
+                setFakeValues(myDeviceInKep, val);
+
+                val++;
             }
 
             Console.WriteLine("Stopping CID Connector service...");
             connector.Stop();
             Console.WriteLine("Stopped.");
         }
+
+
+        private static void setFakeValues(FakeDeviceTags device, byte val)
+        {
+            device.WordTag.Value = val;
+            device.BoolTag.Value = val % 2 == 0;
+            device.CharTag.Value = (sbyte) val;
+            device.ByteTag.Value = val;
+            device.ShortTag.Value = val;
+            device.LongTag.Value = val;
+            device.DWordTag.Value = val;
+            device.FloatTag.Value = val;
+            device.DoubleTag.Value = val;
+            device.DateTag.Value = DateTime.Parse($"2021-03-04T12:34:56.{val}");
+            device.StringTag.Value = $"Value is {val}ms";
+        }
+        
 
     }
 }

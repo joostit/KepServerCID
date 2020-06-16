@@ -6,29 +6,8 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class ByteTag : TagApiBase
+    public class ByteTag : ValueTag<byte>
     {
-        public byte Value
-        {
-            get
-            {
-                if (CidTag != null)
-                {
-                    return base.CidTag.tagReadData.value.valueByte;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            set
-            {
-                if (CidTag != null)
-                {
-                    base.CidTag.tagReadData.value.valueByte = value;
-                }
-            }
-        }
 
         public ByteTag(string name, AccessType accessType, string description, string groupName)
             : base(name, 0, 0, 0, ValueTypes.T_BYTE, accessType, description, groupName)
@@ -42,5 +21,14 @@ namespace KepServer.CidLib.Tags
 
         }
 
+        protected override void SaveValueToCidTag(byte value)
+        {
+            base.CidTag.tagReadData.value.valueByte = value;
+        }
+
+        protected override byte GetValueFromCidTag()
+        {
+            return base.CidTag.tagReadData.value.valueByte;
+        }
     }
 }

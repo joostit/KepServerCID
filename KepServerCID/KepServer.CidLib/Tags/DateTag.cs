@@ -6,30 +6,8 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class DateTag : TagApiBase
+    public class DateTag : ValueTag<DateTime>
     {
-
-        public DateTime Value
-        {
-            get
-            {
-                if (CidTag != null)
-                {
-                    return DateTime.FromOADate(base.CidTag.tagReadData.value.valueDate);
-                }
-                else
-                {
-                    return default(DateTime); ;
-                }
-            }
-            set
-            {
-                if (CidTag != null)
-                {
-                    base.CidTag.tagReadData.value.valueDate = value.ToOADate();
-                }
-            }
-        }
 
         public DateTag(string name, AccessType accessType, string description, string groupName)
             : base(name, 0, 0, 0, ValueTypes.T_DATE, accessType, description, groupName)
@@ -43,5 +21,14 @@ namespace KepServer.CidLib.Tags
 
         }
 
+        protected override void SaveValueToCidTag(DateTime value)
+        {
+            base.CidTag.tagReadData.value.valueDate = value.ToOADate();
+        }
+
+        protected override DateTime GetValueFromCidTag()
+        {
+            return DateTime.FromOADate(base.CidTag.tagReadData.value.valueDate);
+        }
     }
 }

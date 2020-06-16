@@ -6,34 +6,8 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class StringTag : TagApiBase
+    public class StringTag : ValueTag<string>
     {
-
-        public string Value
-        {
-            get
-            {
-                if (CidTag != null)
-                {
-                    return base.CidTag.tagReadData.value.valueString;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            set
-            {
-                if (CidTag != null)
-                {
-                    if(value.Length > base.CidTag.tagReadData.value.valueStringSize)
-                    {
-                        throw new InvalidOperationException("String length too long for tag");
-                    }
-                    base.CidTag.tagReadData.value.valueString = value;
-                }
-            }
-        }
 
         public StringTag(string name, AccessType accessType, string description, string groupName, int maxLength)
             : base(name, (ushort) maxLength, 0, 0, ValueTypes.T_STRING, accessType, description, groupName)
@@ -47,5 +21,26 @@ namespace KepServer.CidLib.Tags
 
         }
 
+        protected override void SaveValueToCidTag(string value)
+        {
+            if (value == null)
+            {
+                value = "";
+            }
+
+            if (value.Length > base.CidTag.tagReadData.value.valueStringSize)
+            {
+                throw new InvalidOperationException("String length too long for tag");
+            }
+            else
+            {
+                base.CidTag.tagReadData.value.valueString = value;
+            }
+        }
+
+        protected override string GetValueFromCidTag()
+        {
+            return base.CidTag.tagReadData.value.valueString;
+        }
     }
 }

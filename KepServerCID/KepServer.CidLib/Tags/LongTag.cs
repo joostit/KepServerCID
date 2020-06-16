@@ -6,31 +6,10 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class LongTag : TagApiBase
+    public class LongTag : ValueTag<int>
     {
 
-        public int Value
-        {
-            get
-            {
-                if (CidTag != null)
-                {
-                    return base.CidTag.tagReadData.value.valueLong;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            set
-            {
-                if (CidTag != null)
-                {
-                    base.CidTag.tagReadData.value.valueLong = value;
-                }
-            }
-        }
-
+        
         public LongTag(string name, AccessType accessType, string description, string groupName)
             : base(name, 0, 0, 0, ValueTypes.T_LONG, accessType, description, groupName)
         {
@@ -43,5 +22,14 @@ namespace KepServer.CidLib.Tags
 
         }
 
+        protected override void SaveValueToCidTag(int value)
+        {
+            base.CidTag.tagReadData.value.valueLong = value;
+        }
+
+        protected override int GetValueFromCidTag()
+        {
+            return base.CidTag.tagReadData.value.valueLong;
+        }
     }
 }
