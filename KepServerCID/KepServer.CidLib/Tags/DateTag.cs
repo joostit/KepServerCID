@@ -6,11 +6,11 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class DateTag : TagDefinition
+    public class DateTag : TagApiBase
     {
 
         public DateTag(string name, AccessType accessType, string description, string groupName)
-            : base(name, 0, 0, 0, Value.T_DATE, accessType, description, groupName)
+            : base(name, 0, 0, 0, ValueTypes.T_DATE, accessType, description, groupName)
         {
 
         }

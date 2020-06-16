@@ -6,11 +6,11 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class DWordTag : TagDefinition
+    public class DWordTag : TagApiBase
     {
 
         public DWordTag(string name, AccessType accessType, string description, string groupName)
-            : base(name, 0, 0, 0, Value.T_DWORD, accessType, description, groupName)
+            : base(name, 0, 0, 0, ValueTypes.T_DWORD, accessType, description, groupName)
         {
 
         }

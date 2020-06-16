@@ -53,5 +53,5 @@ namespace KepServer.CidLib.Types
             groupName = te.groupName;
         }
 
-    } // struct TAGENTRY
+    } 
 }

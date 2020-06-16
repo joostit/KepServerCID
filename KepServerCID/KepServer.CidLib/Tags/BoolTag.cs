@@ -6,10 +6,10 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class BoolTag : TagDefinition
+    public class BoolTag : TagApiBase
     {
         public BoolTag(string name, AccessType accessType, string description, string groupName)
-            : base(name, 0, 0, 0, Value.T_BOOL, accessType, description, groupName)
+            : base(name, 0, 0, 0, ValueTypes.T_BOOL, accessType, description, groupName)
         {
 
         }

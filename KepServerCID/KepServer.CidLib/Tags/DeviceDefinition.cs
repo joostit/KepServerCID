@@ -8,7 +8,7 @@ namespace KepServer.CidLib.Tags
     public class DeviceDefinition
     {
 
-        internal Dictionary<string, TagDefinition> Tags { get; private set; } = new Dictionary<string, TagDefinition>();
+        public Dictionary<string, TagApiBase> Tags { get; private set; } = new Dictionary<string, TagApiBase>();
 
         public string Name { get; private set; }
 
@@ -21,13 +21,13 @@ namespace KepServer.CidLib.Tags
         }
 
 
-        public DeviceDefinition AddTag(TagDefinition tag)
+        public DeviceDefinition AddTag(TagApiBase tag)
         {
             Tags.Add(tag.Name, tag);
             return this;
         }
 
-        public TagDefinition GetTag(string name)
+        public TagApiBase GetTag(string name)
         {
             return Tags[name];
         }

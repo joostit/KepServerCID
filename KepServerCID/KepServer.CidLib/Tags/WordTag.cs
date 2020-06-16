@@ -6,11 +6,23 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class WordTag : TagDefinition
+    public class WordTag : TagApiBase
     {
 
+        public ushort Value
+        {
+            get
+            {
+                return base.CidTag.tagReadData.value.valueWord;
+            }
+            set
+            {
+                base.CidTag.tagReadData.value.valueWord = value;
+            }
+        }
+
         public WordTag(string name, AccessType accessType ,string description, string groupName)
-            :base(name, 0, 0, 0, Value.T_WORD, accessType, description, groupName)
+            :base(name, 0, 0, 0, ValueTypes.T_WORD, accessType, description, groupName)
         {
 
         }

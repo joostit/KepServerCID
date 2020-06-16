@@ -51,6 +51,7 @@ namespace KepServer.CidLib.Internals
         public TagData tagReadData;
         public TagData tagWriteData;
 
+        public event EventHandler NewDataAvailable;
 
         public string GetName()
         {
@@ -95,6 +96,12 @@ namespace KepServer.CidLib.Internals
 
         }
 
+
+        internal void NotifyNewDataAvailable()
+        {
+            NewDataAvailable?.Invoke(this, EventArgs.Empty);
+        }
+
         /// <summary>
         /// Purpose: Format an address to meet the expectation of the CID driver (e.g. D0)
         /// This is not to be confused with a PLC address.
@@ -110,7 +117,7 @@ namespace KepServer.CidLib.Internals
 
             string strExtBuffer = "";
 
-            if (tagDataType == Value.T_STRING)
+            if (tagDataType == ValueTypes.T_STRING)
             {
                 // Format \string length
                 strExtBuffer = string.Format("/{0,0:D}", tagStringSize);
@@ -124,7 +131,7 @@ namespace KepServer.CidLib.Internals
                 if (tagArrayRows == 1)
                 {
                     // Format [cols]
-                    if ((tagDataType & ~Value.T_ARRAY) == Value.T_STRING)
+                    if ((tagDataType & ~ValueTypes.T_ARRAY) == ValueTypes.T_STRING)
                     {
                         strExtBuffer = string.Format("/{0,0:D} [{1,0:D}] ", tagStringSize, tagArrayCols);
                         if (strExtBuffer.Length > 32)
@@ -146,7 +153,7 @@ namespace KepServer.CidLib.Internals
                 else
                 {
                     // Format [rows][cols]
-                    Debug.Assert((tagDataType & ~Value.T_ARRAY) != Value.T_STRING);	// // Multi-dimensional string arrays are not allowed
+                    Debug.Assert((tagDataType & ~ValueTypes.T_ARRAY) != ValueTypes.T_STRING);	// // Multi-dimensional string arrays are not allowed
                     strExtBuffer = string.Format("[{0,0:D}] [{1,0:D}]", tagArrayRows, tagArrayCols);
                     if (strExtBuffer.Length > 32)
                     {
@@ -197,19 +204,19 @@ namespace KepServer.CidLib.Internals
         /// <returns></returns>
         public static VALTYPE MakeArrayType(VALTYPE dataType)
         {
-            return (VALTYPE)(dataType | Value.T_ARRAY);
+            return (VALTYPE)(dataType | ValueTypes.T_ARRAY);
         }
 
 
         public static VALTYPE MakeBasicType(VALTYPE dataType)
         {
-            return (VALTYPE)(dataType & ~Value.T_ARRAY);
+            return (VALTYPE)(dataType & ~ValueTypes.T_ARRAY);
         }
 
 
         public static bool IsArrayType(VALTYPE dataType)
         {
-            return ((dataType & Value.T_ARRAY) == Value.T_ARRAY ? true : false);
+            return ((dataType & ValueTypes.T_ARRAY) == ValueTypes.T_ARRAY ? true : false);
         }
 
 
@@ -217,28 +224,28 @@ namespace KepServer.CidLib.Internals
         {
             switch (valueType)
             {
-                case Value.T_BOOL: return ("Boolean");
-                case Value.T_BYTE: return ("Byte");
-                case Value.T_CHAR: return ("Char");
-                case Value.T_WORD: return ("Word");
-                case Value.T_SHORT: return ("Short");
-                case Value.T_DWORD: return ("DWord");
-                case Value.T_LONG: return ("Long");
-                case Value.T_FLOAT: return ("Float");
-                case Value.T_DOUBLE: return ("Double");
-                case Value.T_DATE: return ("Date");
-                case Value.T_STRING: return ("String");
-                case Value.T_BOOL | Value.T_ARRAY: return ("Boolean Array");
-                case Value.T_BYTE | Value.T_ARRAY: return ("Byte Array");
-                case Value.T_CHAR | Value.T_ARRAY: return ("Char Array");
-                case Value.T_WORD | Value.T_ARRAY: return ("Word Array");
-                case Value.T_SHORT | Value.T_ARRAY: return ("Short Array");
-                case Value.T_DWORD | Value.T_ARRAY: return ("DWord Array");
-                case Value.T_LONG | Value.T_ARRAY: return ("Long Array");
-                case Value.T_FLOAT | Value.T_ARRAY: return ("Float Array");
-                case Value.T_DOUBLE | Value.T_ARRAY: return ("Double Array");
-                case Value.T_STRING | Value.T_ARRAY: return ("String Array");
-                case Value.T_DATE | Value.T_ARRAY: return ("Date Array");
+                case ValueTypes.T_BOOL: return ("Boolean");
+                case ValueTypes.T_BYTE: return ("Byte");
+                case ValueTypes.T_CHAR: return ("Char");
+                case ValueTypes.T_WORD: return ("Word");
+                case ValueTypes.T_SHORT: return ("Short");
+                case ValueTypes.T_DWORD: return ("DWord");
+                case ValueTypes.T_LONG: return ("Long");
+                case ValueTypes.T_FLOAT: return ("Float");
+                case ValueTypes.T_DOUBLE: return ("Double");
+                case ValueTypes.T_DATE: return ("Date");
+                case ValueTypes.T_STRING: return ("String");
+                case ValueTypes.T_BOOL | ValueTypes.T_ARRAY: return ("Boolean Array");
+                case ValueTypes.T_BYTE | ValueTypes.T_ARRAY: return ("Byte Array");
+                case ValueTypes.T_CHAR | ValueTypes.T_ARRAY: return ("Char Array");
+                case ValueTypes.T_WORD | ValueTypes.T_ARRAY: return ("Word Array");
+                case ValueTypes.T_SHORT | ValueTypes.T_ARRAY: return ("Short Array");
+                case ValueTypes.T_DWORD | ValueTypes.T_ARRAY: return ("DWord Array");
+                case ValueTypes.T_LONG | ValueTypes.T_ARRAY: return ("Long Array");
+                case ValueTypes.T_FLOAT | ValueTypes.T_ARRAY: return ("Float Array");
+                case ValueTypes.T_DOUBLE | ValueTypes.T_ARRAY: return ("Double Array");
+                case ValueTypes.T_STRING | ValueTypes.T_ARRAY: return ("String Array");
+                case ValueTypes.T_DATE | ValueTypes.T_ARRAY: return ("Date Array");
 
                 default:
                     return ("Default");
@@ -267,10 +274,10 @@ namespace KepServer.CidLib.Internals
         {
             int elementSize = 0;
 
-            if (tagDataType == Value.T_STRING)
+            if (tagDataType == ValueTypes.T_STRING)
                 return (tagStringSize);
 
-            if (tagDataType == (Value.T_STRING | Value.T_ARRAY))
+            if (tagDataType == (ValueTypes.T_STRING | ValueTypes.T_ARRAY))
                 elementSize = tagStringSize;
             else
                 elementSize = Value.SizeOf(tagDataType);

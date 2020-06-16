@@ -6,10 +6,10 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class CharTag : TagDefinition
+    public class CharTag : TagApiBase
     {
         public CharTag(string name, AccessType accessType, string description, string groupName)
-            : base(name, 0, 0, 0, Value.T_CHAR, accessType, description, groupName)
+            : base(name, 0, 0, 0, ValueTypes.T_CHAR, accessType, description, groupName)
         {
 
         }

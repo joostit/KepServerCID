@@ -403,15 +403,15 @@ namespace KepServer.CidLib.Internals
             BinaryWriter w = new BinaryWriter(s);
 
             VALTYPE vType = value.GetValueType();
-            if (((vType & Value.T_ARRAY) == Value.T_ARRAY) && ((vType & ~Value.T_ARRAY) != Value.T_STRING))//array, not string array
+            if (((vType & ValueTypes.T_ARRAY) == ValueTypes.T_ARRAY) && ((vType & ~ValueTypes.T_ARRAY) != ValueTypes.T_STRING))//array, not string array
             {
                 w.BaseStream.Seek(memOffset + DATA_VALUE_OFFSET + VALUE_EXTARRAY_OFFSET, SeekOrigin.Begin);
             }
-            else if (vType == (Value.T_ARRAY | Value.T_STRING)) //string array
+            else if (vType == (ValueTypes.T_ARRAY | ValueTypes.T_STRING)) //string array
             {
                 w.BaseStream.Seek(memOffset + DATA_VALUE_OFFSET + VALUE_EXTARRAY_OFFSET + STRINGARRAY_ABDATA_OFFSET, SeekOrigin.Begin);
             }
-            else if (vType == Value.T_STRING) //string
+            else if (vType == ValueTypes.T_STRING) //string
             {
                 w.BaseStream.Seek(memOffset + DATA_VALUE_OFFSET + VALUE_EXTARRAY_OFFSET, SeekOrigin.Begin);
             }
@@ -431,15 +431,15 @@ namespace KepServer.CidLib.Internals
             BinaryReader r = new BinaryReader(s);
 
             VALTYPE vType = value.GetValueType();
-            if (((vType & Value.T_ARRAY) == Value.T_ARRAY) && ((vType & ~Value.T_ARRAY) != Value.T_STRING))//array, not string array
+            if (((vType & ValueTypes.T_ARRAY) == ValueTypes.T_ARRAY) && ((vType & ~ValueTypes.T_ARRAY) != ValueTypes.T_STRING))//array, not string array
             {
                 r.BaseStream.Seek(memOffset + DATA_VALUE_OFFSET + VALUE_EXTARRAY_OFFSET, SeekOrigin.Begin);
             }
-            else if (vType == (Value.T_ARRAY | Value.T_STRING)) //string array
+            else if (vType == (ValueTypes.T_ARRAY | ValueTypes.T_STRING)) //string array
             {
                 r.BaseStream.Seek(memOffset + DATA_VALUE_OFFSET + VALUE_EXTARRAY_OFFSET + STRINGARRAY_ABDATA_OFFSET, SeekOrigin.Begin);
             }
-            else if (vType == Value.T_STRING) //string
+            else if (vType == ValueTypes.T_STRING) //string
             {
                 r.BaseStream.Seek(memOffset + DATA_VALUE_OFFSET + VALUE_EXTARRAY_OFFSET, SeekOrigin.Begin);
             }

@@ -6,11 +6,11 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class CharArrayTag : TagDefinition
+    public class CharArrayTag : TagApiBase
     {
 
         public CharArrayTag(string name, int rows, int columns, AccessType accessType, string description, string groupName)
-            : base(name, 0, (ushort)rows, (ushort)columns, Value.T_CHAR | Value.T_ARRAY, accessType, description, groupName)
+            : base(name, 0, (ushort)rows, (ushort)columns, ValueTypes.T_CHAR | ValueTypes.T_ARRAY, accessType, description, groupName)
         {
 
         }

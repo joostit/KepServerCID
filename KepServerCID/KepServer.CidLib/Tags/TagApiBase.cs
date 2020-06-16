@@ -7,11 +7,13 @@ using VALTYPE = System.UInt16;
 using KepServer.CidLib.Types;
 using Microsoft.VisualBasic;
 using System.Text.RegularExpressions;
+using KepServer.CidLib.Internals;
 
 namespace KepServer.CidLib.Tags
 {
-    public abstract class TagDefinition
+    public abstract class TagApiBase
     {
+        internal Tag CidTag { get; set; }
 
         public string Name { get; set; }
 
@@ -29,7 +31,7 @@ namespace KepServer.CidLib.Tags
 
         internal string GroupName { get; set; }
 
-        public TagDefinition(string name, WORD stringSize, WORD arrayRows,
+        public TagApiBase(string name, WORD stringSize, WORD arrayRows,
             WORD arrayCols, VALTYPE valueType, AccessType access,
             string description, string groupName)
         {
@@ -49,5 +51,9 @@ namespace KepServer.CidLib.Tags
             return new TagEntry(Name, StringSize, ArrayRows, ArrayCols, ValueType, Access, Description, GroupName);
         }
 
+        internal void SetInternalTag(Tag cidTag)
+        {
+            CidTag = cidTag;
+        }
     }
 }

@@ -11,6 +11,8 @@
 using KepServer.CidLib.Internals;
 using KepServer.CidLib.Tags;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace KepServer.CidLib
 {
@@ -20,11 +22,48 @@ namespace KepServer.CidLib
     // To build, you must enable "Allow unsafe code" in project build properties.
     public class CidConnector
     {
+
+        public TagsCollection Tags
+        {
+            get
+            {
+                return memInterface.Tags;
+            }
+        }
+
         private MemInterface memInterface;
 
+        private Thread cidRunnerThread;
+
+        public void Start(TagsCollection tagsInfo)
+        {
+
+            string strConfigName = "";
+            string strApplicationDir = "";
+
+            cidRunnerThread = new Thread((o) =>
+            {
+                // Get application info for naming the shared memory file and mutex
+                GetConfigInfo(ref strConfigName, ref strApplicationDir);
+
+                // Start the interface to shared memory
+                memInterface = new MemInterface(tagsInfo);
+                memInterface.Start(strConfigName, strApplicationDir, false);
+            });
+
+            cidRunnerThread.Name = "CID_Runner";
+            cidRunnerThread.IsBackground = true;
+            cidRunnerThread.Start();
+        }
+
+        public void Stop()
+        {
+            memInterface.exitFlag = true;
+            cidRunnerThread.Join();
+        }
 
 
-        public void Run(TagsCollection tagsInfo, bool exportConfig)
+        public void ExportConfiguration(TagsCollection tagsInfo)
         {
             string strConfigName = "";
             string strApplicationDir = "";
@@ -34,11 +73,8 @@ namespace KepServer.CidLib
 
             // Start the interface to shared memory
             memInterface = new MemInterface(tagsInfo);
-            memInterface.Start(strConfigName, strApplicationDir, exportConfig);
-
-
+            memInterface.Start(strConfigName, strApplicationDir, true);
         }
-
 
 
         private void GetConfigInfo(ref string strConfigName, ref string strApplicationDir)

@@ -22,6 +22,7 @@ using WORD = System.UInt16;
 using DWORD = System.UInt32;
 using KepServer.CidLib.Types;
 using KepServer.CidLib.Interop;
+using KepServer.CidLib.Tags;
 
 namespace KepServer.CidLib.Internals
 {
@@ -108,7 +109,7 @@ namespace KepServer.CidLib.Internals
         }
 
 
-        public DWORD AddTag(TagEntry tTagEntry, DWORD relativeOffset)
+        public DWORD AddTag(TagEntry tTagEntry, DWORD relativeOffset, TagApiBase apiTag)
         {
             DWORD readOffset = 0;
             DWORD writeOffset = 0;
@@ -120,6 +121,8 @@ namespace KepServer.CidLib.Internals
             Device refDevice = this;
             // Create new Tag
             refTag = new Tag(memInterface, ref refDevice, tTagEntry, relativeOffset, GetSharedMemoryOffset());
+
+            apiTag.SetInternalTag(refTag);
 
             if (refTag.Equals(null))
             {
@@ -207,7 +210,7 @@ namespace KepServer.CidLib.Internals
                     Register.SetWriteValueExtSize(memInterface.memStream, (long)refTag.GetSharedMemoryOffset(), refTag.GetWriteValueExtSize());
                 }
 
-                if (refTag.GetDataType() == (ushort)(Value.T_ARRAY | Value.T_STRING))
+                if (refTag.GetDataType() == (ushort)(ValueTypes.T_ARRAY | ValueTypes.T_STRING))
                 {
                     nRC = Register.SetReadValueArrayStringSize(memInterface.memStream, (long)refTag.GetSharedMemoryOffset(), refTag.GetReadValueArrayStringSize());
                     if (writeOffset != 0)

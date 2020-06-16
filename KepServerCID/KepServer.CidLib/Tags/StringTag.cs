@@ -6,11 +6,11 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class StringTag : TagDefinition
+    public class StringTag : TagApiBase
     {
 
         public StringTag(string name, AccessType accessType, string description, string groupName, int maxLength)
-            : base(name, (ushort) maxLength, 0, 0, Value.T_STRING, accessType, description, groupName)
+            : base(name, (ushort) maxLength, 0, 0, ValueTypes.T_STRING, accessType, description, groupName)
         {
 
         }

@@ -6,11 +6,11 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class DoubleTag : TagDefinition
+    public class DoubleTag : TagApiBase
     {
 
         public DoubleTag(string name, AccessType accessType, string description, string groupName)
-            : base(name, 0, 0, 0, Value.T_DOUBLE, accessType, description, groupName)
+            : base(name, 0, 0, 0, ValueTypes.T_DOUBLE, accessType, description, groupName)
         {
 
         }

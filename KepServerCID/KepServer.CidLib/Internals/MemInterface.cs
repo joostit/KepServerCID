@@ -48,12 +48,7 @@ namespace KepServer.CidLib.Internals
 
         // Define the devices that we will use.
         // For test purposes, you may comment out a device you do not wish to create.
-        private List<DeviceEntry> deviceTable = new List<DeviceEntry>()
-            {
-            //                         Name,				ID
-			new DeviceEntry ("Device1",              "1"),
-            new DeviceEntry ("MotionController1",    "192.168.1.10"),
-            };
+        private List<DeviceEntry> deviceTable = new List<DeviceEntry>();
 
         // List of devices
         private List<Device> deviceSet = new List<Device>();
@@ -77,11 +72,12 @@ namespace KepServer.CidLib.Internals
         public bool exitFlag = false;
 
 
-        private TagsCollection tagsInfo;
+        public TagsCollection Tags { get; private set; }
+
 
         public MemInterface(TagsCollection tagsInfo)
         {
-            this.tagsInfo = tagsInfo;
+            this.Tags = tagsInfo;
         }
 
         public void Start(string strConfigName, string strApplicationDir, bool exportConfig)
@@ -110,11 +106,6 @@ namespace KepServer.CidLib.Internals
             }
             else
             {
-                //The main process thread will enter an infinite loop until signaled to break.
-                //We need a thread to monitor the keyboard for the user signaling to quit.
-                //Set up and start the thread
-                StartQuitThread();
-
                 // Enter the main processing loop. Return when user signals quit.
                 mainLoop();
             }
@@ -133,18 +124,18 @@ namespace KepServer.CidLib.Internals
         private void LoadTagsInfo()
         {
 
-            tagEntryList = new List<TagEntry>[tagsInfo.Devices.Count];
+            tagEntryList = new List<TagEntry>[Tags.Devices.Count];
             deviceTable = new List<DeviceEntry>();
 
             int deviceIndex = 0;
-            foreach (DeviceDefinition deviceDef in tagsInfo.Devices.Values)
+            foreach (DeviceDefinition deviceDef in Tags.Devices.Values)
             {
                 DeviceEntry device = new DeviceEntry(deviceDef.Name, deviceDef.Id);
                 deviceTable.Add(device);
                 
                 List<TagEntry> deviceTags = new List<TagEntry>();
 
-                foreach(TagDefinition tagDef in deviceDef.Tags.Values)
+                foreach(TagApiBase tagDef in deviceDef.Tags.Values)
                 {
                     deviceTags.Add(tagDef.ToTagEntry());
                 }
@@ -172,29 +163,29 @@ namespace KepServer.CidLib.Internals
 
                 // For test purposes, you may comment out all tags you do not wish to create
                 //												Name,			StringSize,	ArrayRows,	ArrayCols,          Datatype,		                ReadWrite,			         Description,			    Group
-                tagEntryList[deviceNum].Add(new TagEntry("BoolTag", 0, 0, 0, Value.T_BOOL, AccessType.READWRITE, "Example boolean tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("CharTag", 0, 0, 0, Value.T_CHAR, AccessType.READWRITE, "Example signed 8 bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("ByteTag", 0, 0, 0, Value.T_BYTE, AccessType.READWRITE, "Example unsigned 8 bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("ShortTag", 0, 0, 0, Value.T_SHORT, AccessType.READWRITE, "Example signed 16-bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("WordTag", 0, 0, 0, Value.T_WORD, AccessType.READWRITE, "Example unsigned 16-bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("LongTag", 0, 0, 0, Value.T_LONG, AccessType.READWRITE, "Example signed 32-bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("DWordTag", 0, 0, 0, Value.T_DWORD, AccessType.READWRITE, "Example unsigned 32-bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("FloatTag", 0, 0, 0, Value.T_FLOAT, AccessType.READWRITE, "Example 32-bit float tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("DoubleTag", 0, 0, 0, Value.T_DOUBLE, AccessType.READWRITE, "Example double 64-bit tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("DateTag", 0, 0, 0, Value.T_DATE, AccessType.READWRITE, "Example date tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("StringTag", 15, 0, 0, Value.T_STRING, AccessType.READWRITE, "Example string tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("ReadOnlyStringTag", 15, 0, 0, Value.T_STRING, AccessType.READONLY, "Example read-only string tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("BoolArray", 0, 1, 5, Value.T_BOOL | Value.T_ARRAY, AccessType.READWRITE, "Example bool array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("CharArray", 0, 2, 5, Value.T_CHAR | Value.T_ARRAY, AccessType.READWRITE, "Example char array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("ByteArray", 0, 2, 5, Value.T_BYTE | Value.T_ARRAY, AccessType.READWRITE, "Example byte array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("ShortArray", 0, 2, 5, Value.T_SHORT | Value.T_ARRAY, AccessType.READWRITE, "Example short array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("WordArray", 0, 2, 5, Value.T_WORD | Value.T_ARRAY, AccessType.READWRITE, "Example word array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("LongArray", 0, 2, 5, Value.T_LONG | Value.T_ARRAY, AccessType.READWRITE, "Example long array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("DWordArray", 0, 2, 5, Value.T_DWORD | Value.T_ARRAY, AccessType.READWRITE, "Example dword array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("FloatArray", 0, 1, 5, Value.T_FLOAT | Value.T_ARRAY, AccessType.READWRITE, "Example float array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("DoubleArray", 0, 1, 5, Value.T_DOUBLE | Value.T_ARRAY, AccessType.READWRITE, "Example double array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("DateArray", 0, 1, 5, Value.T_DATE | Value.T_ARRAY, AccessType.READWRITE, "Example date array tag", ""));
-                tagEntryList[deviceNum].Add(new TagEntry("StringArray", 15, 1, 5, Value.T_STRING | Value.T_ARRAY, AccessType.READWRITE, "Example string array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("BoolTag", 0, 0, 0, ValueTypes.T_BOOL, AccessType.READWRITE, "Example boolean tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("CharTag", 0, 0, 0, ValueTypes.T_CHAR, AccessType.READWRITE, "Example signed 8 bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("ByteTag", 0, 0, 0, ValueTypes.T_BYTE, AccessType.READWRITE, "Example unsigned 8 bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("ShortTag", 0, 0, 0, ValueTypes.T_SHORT, AccessType.READWRITE, "Example signed 16-bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("WordTag", 0, 0, 0, ValueTypes.T_WORD, AccessType.READWRITE, "Example unsigned 16-bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("LongTag", 0, 0, 0, ValueTypes.T_LONG, AccessType.READWRITE, "Example signed 32-bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("DWordTag", 0, 0, 0, ValueTypes.T_DWORD, AccessType.READWRITE, "Example unsigned 32-bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("FloatTag", 0, 0, 0, ValueTypes.T_FLOAT, AccessType.READWRITE, "Example 32-bit float tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("DoubleTag", 0, 0, 0, ValueTypes.T_DOUBLE, AccessType.READWRITE, "Example double 64-bit tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("DateTag", 0, 0, 0, ValueTypes.T_DATE, AccessType.READWRITE, "Example date tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("StringTag", 15, 0, 0, ValueTypes.T_STRING, AccessType.READWRITE, "Example string tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("ReadOnlyStringTag", 15, 0, 0, ValueTypes.T_STRING, AccessType.READONLY, "Example read-only string tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("BoolArray", 0, 1, 5, ValueTypes.T_BOOL | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example bool array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("CharArray", 0, 2, 5, ValueTypes.T_CHAR | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example char array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("ByteArray", 0, 2, 5, ValueTypes.T_BYTE | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example byte array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("ShortArray", 0, 2, 5, ValueTypes.T_SHORT | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example short array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("WordArray", 0, 2, 5, ValueTypes.T_WORD | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example word array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("LongArray", 0, 2, 5, ValueTypes.T_LONG | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example long array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("DWordArray", 0, 2, 5, ValueTypes.T_DWORD | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example dword array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("FloatArray", 0, 1, 5, ValueTypes.T_FLOAT | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example float array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("DoubleArray", 0, 1, 5, ValueTypes.T_DOUBLE | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example double array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("DateArray", 0, 1, 5, ValueTypes.T_DATE | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example date array tag", ""));
+                tagEntryList[deviceNum].Add(new TagEntry("StringArray", 15, 1, 5, ValueTypes.T_STRING | ValueTypes.T_ARRAY, AccessType.READWRITE, "Example string array tag", ""));
 
                 //always assign the device TAGENTRY list
                 deviceTable[deviceNum].tagEntryList = tagEntryList[deviceNum];
@@ -208,10 +199,10 @@ namespace KepServer.CidLib.Internals
                 tagEntryList[deviceNum] = new List<TagEntry>();
 
                 // For test purposes, you may comment out all tags you do not wish to create
-                tagEntryList[deviceNum].Add(new TagEntry("FaultString", 100, 0, 0, Value.T_STRING, AccessType.READONLY, "", "X Axis\\Status"));
-                tagEntryList[deviceNum].Add(new TagEntry("ServoStatus", 0, 0, 0, Value.T_DWORD, AccessType.READONLY, "", "X Axis\\Status"));
-                tagEntryList[deviceNum].Add(new TagEntry("Position", 0, 0, 0, Value.T_FLOAT, AccessType.READWRITE, "", "X Axis"));
-                tagEntryList[deviceNum].Add(new TagEntry("Acceleration", 0, 1, 5, Value.T_FLOAT, AccessType.READONLY, "", "X Axis"));
+                tagEntryList[deviceNum].Add(new TagEntry("FaultString", 100, 0, 0, ValueTypes.T_STRING, AccessType.READONLY, "", "X Axis\\Status"));
+                tagEntryList[deviceNum].Add(new TagEntry("ServoStatus", 0, 0, 0, ValueTypes.T_DWORD, AccessType.READONLY, "", "X Axis\\Status"));
+                tagEntryList[deviceNum].Add(new TagEntry("Position", 0, 0, 0, ValueTypes.T_FLOAT, AccessType.READWRITE, "", "X Axis"));
+                tagEntryList[deviceNum].Add(new TagEntry("Acceleration", 0, 1, 5, ValueTypes.T_FLOAT, AccessType.READONLY, "", "X Axis"));
 
                 //always assign the device TAGENTRY list
 
@@ -275,7 +266,12 @@ namespace KepServer.CidLib.Internals
 
                         foreach (TagEntry tagEntry in deviceTable[nDeviceTableIndex].tagEntryList)
                         {
-                            nextAvailableTagOffset = device.AddTag(tagEntry, nextAvailableTagOffset);
+                            string devName = deviceTable[nDeviceTableIndex].strName;
+                            string tagName = tagEntry.strName;
+
+                            TagApiBase apiTag = Tags.Devices[devName].Tags[tagName];
+
+                            nextAvailableTagOffset = device.AddTag(tagEntry, nextAvailableTagOffset, apiTag);
                         }
 
                         nextAvailableDeviceOffset += nextAvailableTagOffset;
@@ -300,13 +296,6 @@ namespace KepServer.CidLib.Internals
 
         public void mainLoop()
         {
-            if (exitFlag == true) // may be set after exporting config
-            {
-                return;
-            }
-
-            Console.WriteLine("CIDA C# Reference Implementation is currently running.");
-            Console.WriteLine("Press 'q' to quit");
 
             // **** set up and enter the main scan loop ****
             int nRC = TagData.SMRC_NO_ERROR;
@@ -321,6 +310,7 @@ namespace KepServer.CidLib.Internals
                 if (exitFlag == true) //the thread should set this
                     break;
 
+                // ToDo: This mechanism and code is fubar fugly. Improve it.
 
                 // refTag is assigned after Read/Write to "Device" and Process Read/Write Response (Shared Memory).
                 // The reason we don't assign the tag now is that we would need to lock Shared Memory to check for pending requests,
@@ -401,6 +391,7 @@ namespace KepServer.CidLib.Internals
                                 if (nRC == TagData.SMRC_NO_ERROR)
                                 {
                                     refTag.tagWriteResponsePending = false;
+                                    refTag.NotifyNewDataAvailable();
                                 }
                             }
                         } // if write response pending
@@ -658,14 +649,6 @@ namespace KepServer.CidLib.Internals
 
         } 
 
-
-        public void StartQuitThread()
-        {
-            QuitThread quitThreadClass = new QuitThread(this);
-            Thread quitThread = new Thread(quitThreadClass.RuntimeThreadProc);
-            quitThread.Name = "Quit_Loop";
-            quitThread.Start();
-        } 
 
         // **************************************************************************
         // GetNextTag
