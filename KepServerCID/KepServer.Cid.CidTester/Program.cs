@@ -14,12 +14,14 @@ namespace KepServer.Cid.CidTester
             bool run = true;
             Console.WriteLine("Started");
 
-            FakeDeviceTags myDeviceInKep = new FakeDeviceTags();
+            //FakeDeviceTags myDeviceInKep = new FakeDeviceTags();
+
+            ThreeShapeScannerCid scannerCid = new ThreeShapeScannerCid();
 
             CidConnector connector = new CidConnector();
 
-            //connector.ExportConfiguration(fakeDevice.Tags);
-            connector.Start(myDeviceInKep.Tags);
+            connector.ExportConfiguration(scannerCid.Tags);
+            //connector.Start(scannerCid.Tags);
 
 
             Task inputWaiter = Task.Run(() =>
@@ -32,9 +34,10 @@ namespace KepServer.Cid.CidTester
             ushort val = 0;
             while (run)
             {
-                Thread.Sleep(100);
-                
-                myDeviceInKep.WordTag.Value = val++;
+                Thread.Sleep(1000);
+                scannerCid.JobCount.Value = val++;
+                scannerCid.IsRunning.Value = val % 2 == 0;
+                //myDeviceInKep.WordTag.Value = val++;
             }
 
             Console.WriteLine("Stopping CID Connector service...");

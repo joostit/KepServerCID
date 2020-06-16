@@ -484,8 +484,7 @@ namespace KepServer.CidLib.Internals
                     // Release file
                     sFile.Close();
                     ExportConfiguration(strConfigFile, strConfigName);
-                    Console.WriteLine("Created xml config file. Press a key to finish");
-                    Console.ReadKey();
+                    Console.WriteLine("Created xml config file.");
                 }
             }
 

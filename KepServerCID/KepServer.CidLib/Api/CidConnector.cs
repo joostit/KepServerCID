@@ -66,7 +66,11 @@ namespace KepServer.CidLib
         public void Stop()
         {
             memInterface.exitFlag = true;
-            cidRunnerThread.Join();
+
+            if (cidRunnerThread != null)
+            {
+                cidRunnerThread.Join();
+            }
         }
 
 
