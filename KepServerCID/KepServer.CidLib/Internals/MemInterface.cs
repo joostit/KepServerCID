@@ -321,6 +321,7 @@ namespace KepServer.CidLib.Internals
                 if (exitFlag == true) //the thread should set this
                     break;
 
+
                 // refTag is assigned after Read/Write to "Device" and Process Read/Write Response (Shared Memory).
                 // The reason we don't assign the tag now is that we would need to lock Shared Memory to check for pending requests,
                 // unlock Shared Memory, read/write to "device", then lock Shared Memory again to set responses.  Locking
@@ -333,6 +334,7 @@ namespace KepServer.CidLib.Internals
                     // **************************
                     if (refTag.tagWriteRequestPending)
                     {
+                        // Write means: Kepware --> CIDA
                         // Important: In a commercial application, this is where you would send the write request to the device.
                         // Since data is simulated, the write response is immediately available.
                         refTag.tagReadData.value = refTag.tagWriteData.value;       // assign value written to value to be read
@@ -349,6 +351,7 @@ namespace KepServer.CidLib.Internals
 
                     if (refTag.tagReadRequestPending)
                     {
+                        // Read means: CIDA --> Kepware
                         // Important: In a commercial application, this is where you would send the read request to the device
                         // Since data is simulated, the read response is immediately available.
                         if (refTag.IsWriteable() == true)
@@ -389,25 +392,12 @@ namespace KepServer.CidLib.Internals
                             bool bWriteResponsePending = false;
                             Register.GetWriteResponsePending(memStream, refTag.GetSharedMemoryOffset(), ref bWriteResponsePending);
 
-#if TRACE_SM_ACCESS
-                            msg = string.Format ("{0,8:0D}: Tag " +
-                                "{1,0:T}: GetWriteResponsePending nRC = " +
-                                    "{2,0:D}, bWriteResponsePending = {3,0:D}", Device.GetTickCount (), refTag.GetName (), nRC, bWriteResponsePending);
-                            Trace.WriteLine (msg);
-#endif//TRACE_SM_ACCESS
-
                             if (nRC == TagData.SMRC_NO_ERROR)
                             {
                                 // CID driver should not issue a write before completing the last write
                                 Debug.Assert(!bWriteResponsePending);
                                 Register.SetWriteResponse(memStream, refTag.GetSharedMemoryOffset(), refTag.tagWriteData.errorCode != 0, refTag.tagWriteData.errorCode, refTag.tagWriteData.quality, refTag.tagWriteData.timeStamp);
 
-#if TRACE_SM_ACCESS
-                                msg = string.Format ("{0,8:0D}: Tag " +
-                                    "{1,0:T}: SetWriteResponse nRC = " +
-                                        "{2,0:D}", Device.GetTickCount (), refTag.GetName (), nRC);
-                                Trace.WriteLine (msg);
-#endif//TRACE_SM_ACCESS
                                 if (nRC == TagData.SMRC_NO_ERROR)
                                 {
                                     refTag.tagWriteResponsePending = false;
@@ -422,34 +412,20 @@ namespace KepServer.CidLib.Internals
 
                             Register.GetReadResponsePending(memStream, refTag.GetSharedMemoryOffset(), ref bReadResponsePending);
 
-#if TRACE_SM_ACCESS
-                            msg = string.Format ("{0,8:0D}: Tag " +
-                                "{1,0:T}: GetReadResponsePending nRC = " +
-                                    "{2,0:D}, bReadResponsePending = {3,0:D}", Device.GetTickCount (), refTag.GetName (), nRC, bReadResponsePending);
-                            Trace.WriteLine (msg);
-#endif//TRACE_SM_ACCESS
-
                             if (nRC == TagData.SMRC_NO_ERROR)
                             {
                                 // CID driver should not issue a read before completing the last read.
                                 Debug.Assert(!bReadResponsePending);
                                 Register.SetReadResponse(memStream, refTag.GetSharedMemoryOffset(), refTag.tagReadData.value, refTag.tagReadData.errorCode != 0, refTag.tagReadData.errorCode, refTag.tagReadData.quality, refTag.tagReadData.timeStamp);
 
-#if TRACE_SM_ACCESS
-                                msg = string.Format ("{0,8:0D}: Tag " +
-                                    "{1,0:T}: SetReadResponse nRC = " +
-                                        "{2,0:D}", Device.GetTickCount (), refTag.GetName (), nRC);
-                                Trace.WriteLine (msg);
-#endif//TRACE_SM_ACCESS
-
                                 if (nRC == TagData.SMRC_NO_ERROR)
                                 {
                                     refTag.tagReadResponsePending = false;
                                 }
                             }
-                        } // if read response pending
-                    } // if read or write responses are pending
-                } // if (refTag != null)
+                        } 
+                    }
+                }
 
                 // Important: In a commercial application, you may not want to process one tag at a time as this reference implementation does.  Instead you would
                 // want to process as many tags as possible, processing requests and responses.
@@ -495,25 +471,11 @@ namespace KepServer.CidLib.Internals
                     bool WriteRequestPending = false;
                     nRC = Register.GetWriteRequestPending(memStream, refTag.GetSharedMemoryOffset(), ref WriteRequestPending);
 
-#if TRACE_SM_ACCESS
-                msg = string.Format ("{0,8:0D}: Tag " +
-                    "{1,0:T}: GetWriteRequestPending nRC = " +
-                        "{2,0:D}, WriteRequestPending = {3,0:D}", Device.GetTickCount (), refTag.GetName (), nRC, bWriteRequestPending);
-                Trace.WriteLine (msg);
-#endif//TRACE_SM_ACCESS
-
                     if (nRC == TagData.SMRC_NO_ERROR)
                     {
                         if (WriteRequestPending)
                         {
                             nRC = Register.GetWriteRequest(memStream, refTag.GetSharedMemoryOffset(), ref refTag.tagWriteData.value, ref refTag.tagWriteData.quality, ref refTag.tagWriteData.timeStamp);
-
-#if TRACE_SM_ACCESS
-							msg = string.Format ("{0,8:0D}: Tag " +
-								"{1,0:T}: GetWriteRequest nRC = " +
-									"{2,0:D}", Device.GetTickCount (), refTag.GetName (), nRC);
-							Trace.WriteLine (msg);
-#endif//TRACE_SM_ACCESS
 
                             if (nRC == TagData.SMRC_NO_ERROR)
                             {
@@ -526,25 +488,11 @@ namespace KepServer.CidLib.Internals
                     bool bReadRequestPending = false;
                     nRC = Register.GetReadRequestPending(memStream, refTag.GetSharedMemoryOffset(), ref bReadRequestPending);
 
-#if TRACE_SM_ACCESS
-                    msg = string.Format ("{0,8:0D}: Tag " +
-                        "{1,0:T}: GetReadRequestPending nRC = " +
-                            "{2,0:D}, bReadRequestPending = {3,0:D}", Device.GetTickCount (), refTag.GetName (), nRC, bReadRequestPending);
-                    Trace.WriteLine (msg);
-#endif//TRACE_SM_ACCESS
-
                     if (nRC == TagData.SMRC_NO_ERROR)
                     {
                         if (bReadRequestPending)
                         {
                             nRC = Register.GetReadRequest(memStream, refTag.GetSharedMemoryOffset());
-
-#if TRACE_SM_ACCESS
-                            msg = string.Format ("{0,8:0D}: Tag " +
-                                "{1,0:T}: GetReadRequest nRC = " +
-                                    "{2,0:D}", Device.GetTickCount (), refTag.GetName (), nRC);
-                            Trace.WriteLine (msg);
-#endif//TRACE_SM_ACCESS
 
                             if (nRC == TagData.SMRC_NO_ERROR)
                             {

@@ -193,90 +193,26 @@ namespace KepServer.CidLib.Internals
             {
                 Register.SetReadOffset(memInterface.memStream, (long)refTag.GetSharedMemoryOffset(), readOffset);
 
-#if TRACE_SM_ACCESS
-                msg = string.Format("{0,8:0D}: Tag " +
-                    "{1,0:T}" + ": SetReadOffset nRC = " +
-                    "{2,0:D}" +
-                    ", dwReadOffset = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, readOffset);
-                Trace.WriteLine(msg);
-#endif//TRACE_SM_ACCESS
-
                 Register.SetWriteOffset(memInterface.memStream, (long)refTag.GetSharedMemoryOffset(), writeOffset);
 
-#if TRACE_SM_ACCESS
-                msg = string.Format("{0,8:0D}: Tag " +
-                    "{1,0:T}: SetWriteOffset nRC = " +
-                    "{2,0:D}" +
-                    ", dwWriteOffset = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, writeOffset);
-                Trace.WriteLine(msg);
-#endif//TRACE_SM_ACCESS
-
                 Register.SetReadValueType(memInterface.memStream, (long)refTag.GetSharedMemoryOffset(), refTag.GetReadValueType());
-
-#if TRACE_SM_ACCESS
-                msg = string.Format("{0,8:0D}: Tag " +
-                    "{1,0:T}: SetReadValueType nRC = " +
-                    "{2,0:D}" +
-                    ", ReadValueType = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, refTag.GetReadValueType());
-                Trace.WriteLine(msg);
-#endif//TRACE_SM_ACCESS
 
                 if (writeOffset != 0)
                 {
                     Register.SetWriteValueType(memInterface.memStream, (long)refTag.GetSharedMemoryOffset(), refTag.GetWriteValueType());
-
-#if TRACE_SM_ACCESS
-                    msg = string.Format("{0,8:0D}: Tag " +
-                        "{1,0:T}: SetWriteValueType nRC = " +
-                        "{2,0:D}" +
-                        ", WriteValueType = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, refTag.GetWriteValueType());
-                    Trace.WriteLine(msg);
-#endif//TRACE_SM_ACCESS
                 }
                 Register.SetReadValueExtSize(memInterface.memStream, (long)refTag.GetSharedMemoryOffset(), refTag.GetReadValueExtSize());
-
-#if TRACE_SM_ACCESS
-                msg = string.Format("{0,8:0D}: Tag " +
-                    "{1,0:T}: SetReadValueExtSize nRC = " +
-                    "{2,0:D}" +
-                    ", ReadValueExtSize = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, refTag.GetReadValueExtSize());
-                Trace.WriteLine(msg);
-#endif//TRACE_SM_ACCESS
                 if (writeOffset != 0)
                 {
                     Register.SetWriteValueExtSize(memInterface.memStream, (long)refTag.GetSharedMemoryOffset(), refTag.GetWriteValueExtSize());
-
-#if TRACE_SM_ACCESS
-                    msg = string.Format("{0,8:0D}: Tag " +
-                        "{1,0:T}: SetWriteValueExtSize nRC = " +
-                        "{2,0:D}" +
-                        ", WriteValueExtSize = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, refTag.GetWriteValueExtSize());
-                    Trace.WriteLine(msg);
-#endif//TRACE_SM_ACCESS
                 }
 
                 if (refTag.GetDataType() == (ushort)(Value.T_ARRAY | Value.T_STRING))
                 {
                     nRC = Register.SetReadValueArrayStringSize(memInterface.memStream, (long)refTag.GetSharedMemoryOffset(), refTag.GetReadValueArrayStringSize());
-
-#if TRACE_SM_ACCESS
-                    msg = string.Format("{0,8:0D}: Tag " +
-                        "{1,0:T}: SetReadValueArrayStringSize nRC = " +
-                        "{2,0:D}" +
-                        ", ReadValueArrayStringSize = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, refTag.GetReadValueArrayStringSize());
-                    Trace.WriteLine(msg);
-#endif//TRACE_SM_ACCESS
                     if (writeOffset != 0)
                     {
                         nRC = Register.SetWriteValueArrayStringSize(memInterface.memStream, (long)refTag.GetSharedMemoryOffset(), (WORD)refTag.GetWriteValueArrayStringSize());
-
-#if TRACE_SM_ACCESS
-                        msg = string.Format("{0,8:0D}: Tag " +
-                            "{1,0:T}: SetWriteValueArrayStringSize nRC = " +
-                            "{2,0:D}" +
-                            ", WriteValueArrayStringSize = {3,0:D}", Kernel32.GetTickCount(), refTag.GetName(), nRC, refTag.GetWriteValueArrayStringSize());
-                        Trace.WriteLine(msg);
-#endif//TRACE_SM_ACCESS
                     }
                 }
 
