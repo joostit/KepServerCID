@@ -6,7 +6,7 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class BoolArrayTag : ArrayTag<bool[,], bool, ushort>
+    public class BoolArrayTag : ArrayTag<bool, ushort>
     {
 
         public BoolArrayTag(string name, int rows, int columns, AccessType accessType, string description, string groupName)

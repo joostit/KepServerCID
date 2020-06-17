@@ -6,7 +6,7 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class CharArrayTag : ArrayTag<sbyte[,], sbyte, sbyte>
+    public class CharArrayTag : ArrayTag<sbyte, sbyte>
     {
 
         public CharArrayTag(string name, int rows, int columns, AccessType accessType, string description, string groupName)

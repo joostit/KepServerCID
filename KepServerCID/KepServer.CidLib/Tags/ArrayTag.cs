@@ -13,8 +13,8 @@ namespace KepServer.CidLib.Tags
     /// <typeparam name="TArrayType">The type of array</typeparam>
     /// <typeparam name="TNetElement">The type of element as used in c# .NET</typeparam>
     /// <typeparam name="TCidElement">The type of element as it is stored in the CID Tag</typeparam>
-    public abstract class ArrayTag<TArrayType, TNetElement, TCidElement>
-        : ValueTag<TArrayType>
+    public abstract class ArrayTag<TNetElement, TCidElement>
+        : ValueTag<TNetElement[,]>
     {
 
         public int Rows { get; private set; }
@@ -51,14 +51,14 @@ namespace KepServer.CidLib.Tags
             this.Rows = arrayRows;
             this.Columns = this.ArrayCols;
 
-            if (!typeof(Array).IsAssignableFrom(typeof(TArrayType)))
+            if (!typeof(Array).IsAssignableFrom(typeof(TNetElement[,])))
             {
                 throw new InvalidCastException("TArrayType should be of a two dimensional array type");
             }
         }
 
 
-        protected override TArrayType GetValueFromCidTag()
+        protected override TNetElement[,] GetValueFromCidTag()
         {
             Array cidArray = CidTag.tagReadData.value.GetArray();
             TNetElement[,] retVal = new TNetElement[Rows, Columns];
@@ -73,10 +73,10 @@ namespace KepServer.CidLib.Tags
                 }
             }
 
-            return (TArrayType) (object) retVal;
+            return (TNetElement[,]) (object) retVal;
         }
 
-        protected override void SaveValueToCidTag(TArrayType value)
+        protected override void SaveValueToCidTag(TNetElement[,] value)
         {
             Array targetArray = new TCidElement[Rows, Columns];
             Array sourceArray = value as Array;
