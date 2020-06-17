@@ -3,18 +3,18 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace KepServer.CidLib.Tags
+namespace KepServer.CidLib.Tags.Base
 {
 
     /// <summary>
-    /// Base class for array type tags. Note that each operation of getting and setting the Value property is relatively costly. For getting or setting individual 
-    /// elements, use the index operator of this class.
+    /// Base class for array type tags. Note that each operation of getting or setting the Value property is relatively costly. For getting or setting individual 
+    /// elements, use the index operator of this class instead.
     /// </summary>
     /// <typeparam name="TArrayType">The type of array</typeparam>
     /// <typeparam name="TNetElement">The type of element as used in c# .NET</typeparam>
     /// <typeparam name="TCidElement">The type of element as it is stored in the CID Tag</typeparam>
-    public abstract class ArrayTag<TNetElement, TCidElement>
-        : ValueTag<TNetElement[,]>
+    public abstract class ArrayTagBase<TNetElement, TCidElement>
+        : ValueTagBase<TNetElement[,]>
     {
 
         public int Rows { get; private set; }
@@ -45,7 +45,7 @@ namespace KepServer.CidLib.Tags
             }
         }
 
-        protected ArrayTag(string name, ushort stringSize, ushort arrayRows, ushort arrayCols, ushort valueType, AccessType access, string description, string groupName) 
+        protected ArrayTagBase(string name, ushort stringSize, ushort arrayRows, ushort arrayCols, ushort valueType, AccessType access, string description, string groupName) 
             : base(name, stringSize, arrayRows, arrayCols, valueType, access, description, groupName)
         {
             this.Rows = arrayRows;
@@ -75,6 +75,7 @@ namespace KepServer.CidLib.Tags
 
             return (TNetElement[,]) (object) retVal;
         }
+
 
         protected override void SaveValueToCidTag(TNetElement[,] value)
         {

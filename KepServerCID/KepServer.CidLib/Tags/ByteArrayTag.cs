@@ -1,4 +1,5 @@
 ﻿using KepServer.CidLib.Internals;
+using KepServer.CidLib.Tags.Base;
 using KepServer.CidLib.Types;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class ByteArrayTag : ArrayTag<byte, byte>
+    public class ByteArrayTag : SimpleTypeArrayTagBase<byte>
     {
 
         public ByteArrayTag(string name, int rows, int columns, AccessType accessType, string description, string groupName)
@@ -21,14 +22,5 @@ namespace KepServer.CidLib.Tags
 
         }
 
-        protected override byte CidToNetType(byte value)
-        {
-            return value;
-        }
-
-        protected override byte NetToCidType(byte value)
-        {
-            return value;
-        }
     }
 }

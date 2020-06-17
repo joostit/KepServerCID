@@ -64,7 +64,7 @@ namespace KepServer.Cid.CidTester
                 .AddTag(FloatArrayTag = new FloatArrayTag("aFloatArrayTag", 3, 4, "a Float array tag of 3 x 4"))
                 .AddTag(DoubleArrayTag = new DoubleArrayTag("aDoubleArrayTag", 3, 4, "a Double array tag of 3 x 4"))
                 .AddTag(DateArrayTag = new DateArrayTag("aDateArrayTag", 3, 4, "a Date array tag of 3 x 4"))
-                .AddTag(StringArrayTag = new StringArrayTag("aStringArrayTag", 5, "a String array tag 5 strings"));
+                .AddTag(StringArrayTag = new StringArrayTag("aStringArrayTag", 5, "a String array tag 5 strings",  50));
         }
 
 
@@ -87,6 +87,14 @@ namespace KepServer.Cid.CidTester
                 Console.WriteLine("BoolArrayTag: New data written");
                 PrintArray(BoolArrayTag.Value);
                 Console.WriteLine(BoolArrayTag[0, 1].ToString());
+            };
+
+
+            StringArrayTag.NewDataAvailable += (s, e) =>
+            {
+                Console.WriteLine("StringArrayTag: New data written");
+                PrintArray(StringArrayTag.Value);
+                Console.WriteLine();
             };
 
         }

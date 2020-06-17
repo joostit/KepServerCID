@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace KepServer.CidLib.Tags
+namespace KepServer.CidLib.Tags.Base
 {
-    public abstract class ValueTag<TNETValue> : TagApiBase
+    public abstract class ValueTagBase<TNETValue> : TagBase
     {
 
         public TNETValue Value
@@ -27,7 +27,7 @@ namespace KepServer.CidLib.Tags
             }
         }
 
-        protected ValueTag(string name, ushort stringSize, ushort arrayRows, ushort arrayCols, ushort valueType, AccessType access, string description, string groupName) 
+        protected ValueTagBase(string name, ushort stringSize, ushort arrayRows, ushort arrayCols, ushort valueType, AccessType access, string description, string groupName) 
             : base(name, stringSize, arrayRows, arrayCols, valueType, access, description, groupName)
         {
         }

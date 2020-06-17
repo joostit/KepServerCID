@@ -61,6 +61,9 @@ namespace KepServer.Cid.CidTester
             device.StringTag.Value = $"Value is {val}ms";
 
             device.BoolArrayTag[2,2] = val % 2 == 0;
+
+
+            device.StringArrayTag[0, 2] = "Fake: " + val.ToString();
         }
         
 

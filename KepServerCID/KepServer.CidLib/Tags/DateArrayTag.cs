@@ -1,4 +1,5 @@
 ﻿using KepServer.CidLib.Internals;
+using KepServer.CidLib.Tags.Base;
 using KepServer.CidLib.Types;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class DateArrayTag : TagApiBase
+    public class DateArrayTag : ArrayTagBase<DateTime, double>
     {
 
         public DateArrayTag(string name, int rows, int columns, AccessType accessType, string description, string groupName)
@@ -19,6 +20,16 @@ namespace KepServer.CidLib.Tags
             : this(name, rows, columns, AccessType.READWRITE, description, "")
         {
 
+        }
+
+        protected override DateTime CidToNetType(double value)
+        {
+            return DateTime.FromOADate(value);
+        }
+
+        protected override double NetToCidType(DateTime value)
+        {
+            return value.ToOADate();
         }
     }
 }

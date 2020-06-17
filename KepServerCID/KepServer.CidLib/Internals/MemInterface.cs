@@ -36,6 +36,7 @@ using DWORD = System.UInt32;
 using KepServer.CidLib;
 using KepServer.CidLib.Types;
 using KepServer.CidLib.Tags;
+using KepServer.CidLib.Tags.Base;
 
 namespace KepServer.CidLib.Internals
 {
@@ -128,7 +129,6 @@ namespace KepServer.CidLib.Internals
 
         private void LoadTagsInfo()
         {
-
             tagEntryList = new List<TagEntry>[Tags.Devices.Count];
             deviceTable = new List<DeviceEntry>();
 
@@ -140,7 +140,7 @@ namespace KepServer.CidLib.Internals
                 
                 List<TagEntry> deviceTags = new List<TagEntry>();
 
-                foreach(TagApiBase tagDef in deviceDef.Tags.Values)
+                foreach(TagBase tagDef in deviceDef.Tags.Values)
                 {
                     deviceTags.Add(tagDef.ToTagEntry());
                 }
@@ -210,7 +210,7 @@ namespace KepServer.CidLib.Internals
                             string devName = deviceTable[nDeviceTableIndex].strName;
                             string tagName = tagEntry.strName;
 
-                            TagApiBase apiTag = Tags.Devices[devName].Tags[tagName];
+                            TagBase apiTag = Tags.Devices[devName].Tags[tagName];
 
                             nextAvailableTagOffset = device.AddTag(tagEntry, nextAvailableTagOffset, apiTag);
                         }

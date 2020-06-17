@@ -1,4 +1,5 @@
 ﻿using KepServer.CidLib.Internals;
+using KepServer.CidLib.Tags.Base;
 using KepServer.CidLib.Types;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class FloatArrayTag : TagApiBase
+    public class FloatArrayTag : SimpleTypeArrayTagBase<float>
     {
 
         public FloatArrayTag(string name, int rows, int columns, AccessType accessType, string description, string groupName)

@@ -23,6 +23,7 @@ using DWORD = System.UInt32;
 using KepServer.CidLib.Types;
 using KepServer.CidLib.Interop;
 using KepServer.CidLib.Tags;
+using KepServer.CidLib.Tags.Base;
 
 namespace KepServer.CidLib.Internals
 {
@@ -109,7 +110,7 @@ namespace KepServer.CidLib.Internals
         }
 
 
-        public DWORD AddTag(TagEntry tTagEntry, DWORD relativeOffset, TagApiBase apiTag)
+        public DWORD AddTag(TagEntry tTagEntry, DWORD relativeOffset, TagBase apiTag)
         {
             DWORD readOffset = 0;
             DWORD writeOffset = 0;

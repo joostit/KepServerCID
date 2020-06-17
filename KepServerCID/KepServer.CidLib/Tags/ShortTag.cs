@@ -1,4 +1,5 @@
 ﻿using KepServer.CidLib.Internals;
+using KepServer.CidLib.Tags.Base;
 using KepServer.CidLib.Types;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class ShortTag : ValueTag<ushort>
+    public class ShortTag : ValueTagBase<ushort>
     {
 
         public ShortTag(string name, AccessType accessType, string description, string groupName)

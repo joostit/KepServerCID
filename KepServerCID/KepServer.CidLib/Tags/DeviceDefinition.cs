@@ -1,4 +1,5 @@
 ﻿using KepServer.CidLib.Internals;
+using KepServer.CidLib.Tags.Base;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,7 +9,7 @@ namespace KepServer.CidLib.Tags
     public class DeviceDefinition
     {
 
-        public Dictionary<string, TagApiBase> Tags { get; private set; } = new Dictionary<string, TagApiBase>();
+        public Dictionary<string, TagBase> Tags { get; private set; } = new Dictionary<string, TagBase>();
 
         public string Name { get; private set; }
 
@@ -21,13 +22,13 @@ namespace KepServer.CidLib.Tags
         }
 
 
-        public DeviceDefinition AddTag(TagApiBase tag)
+        public DeviceDefinition AddTag(TagBase tag)
         {
             Tags.Add(tag.Name, tag);
             return this;
         }
 
-        public TagApiBase GetTag(string name)
+        public TagBase GetTag(string name)
         {
             return Tags[name];
         }

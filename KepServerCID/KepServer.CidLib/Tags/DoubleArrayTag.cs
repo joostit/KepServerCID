@@ -1,4 +1,5 @@
 ﻿using KepServer.CidLib.Internals;
+using KepServer.CidLib.Tags.Base;
 using KepServer.CidLib.Types;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class DoubleArrayTag : TagApiBase
+    public class DoubleArrayTag : SimpleTypeArrayTagBase<double>
     {
 
         public DoubleArrayTag(string name, int rows, int columns, AccessType accessType, string description, string groupName)
@@ -20,5 +21,6 @@ namespace KepServer.CidLib.Tags
         {
 
         }
+
     }
 }

@@ -9,9 +9,9 @@ using Microsoft.VisualBasic;
 using System.Text.RegularExpressions;
 using KepServer.CidLib.Internals;
 
-namespace KepServer.CidLib.Tags
+namespace KepServer.CidLib.Tags.Base
 {
-    public abstract class TagApiBase
+    public abstract class TagBase
     {
         public event EventHandler NewDataAvailable;
 
@@ -33,7 +33,7 @@ namespace KepServer.CidLib.Tags
 
         internal string GroupName { get; set; }
 
-        public TagApiBase(string name, WORD stringSize, WORD arrayRows,
+        public TagBase(string name, WORD stringSize, WORD arrayRows,
             WORD arrayCols, VALTYPE valueType, AccessType access,
             string description, string groupName)
         {
