@@ -361,16 +361,24 @@ namespace KepServer.CidLib.Internals
                         break;
                     }
                     break;
-
             } 
 
         }
 
 
-        public void SetArray<T>(T[,] values)
+        public void SetArrayValues(Array values)
         {
             Array.Copy(values, valueDynamicArray, values.Length);
-            //this.valueDynamicArray.SetValue(value, row, col);
+        }
+
+        public Array GetArray()
+        {
+            return valueDynamicArray;
+        }
+
+        public void SetArrayElement(object value, int row, int column)
+        {
+            valueDynamicArray.SetValue(value, row, column);
         }
 
         /// <summary>

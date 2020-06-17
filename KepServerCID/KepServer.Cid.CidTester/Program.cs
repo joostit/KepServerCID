@@ -59,6 +59,8 @@ namespace KepServer.Cid.CidTester
             device.DoubleTag.Value = val;
             device.DateTag.Value = DateTime.Parse($"2021-03-04T12:34:56.{val}");
             device.StringTag.Value = $"Value is {val}ms";
+
+            device.BoolArrayTag[2,2] = val % 2 == 0;
         }
         
 

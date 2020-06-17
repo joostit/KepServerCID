@@ -6,7 +6,7 @@ using System.Text;
 
 namespace KepServer.CidLib.Tags
 {
-    public class CharArrayTag : TagApiBase
+    public class CharArrayTag : ArrayTag<sbyte[,], sbyte, sbyte>
     {
 
         public CharArrayTag(string name, int rows, int columns, AccessType accessType, string description, string groupName)
@@ -19,6 +19,16 @@ namespace KepServer.CidLib.Tags
             : this(name, rows, columns, AccessType.READWRITE, description, "")
         {
 
+        }
+
+        protected override sbyte CidToNetType(sbyte value)
+        {
+            return value;
+        }
+
+        protected override sbyte NetToCidType(sbyte value)
+        {
+            return value;
         }
     }
 }

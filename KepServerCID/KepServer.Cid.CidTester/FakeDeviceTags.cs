@@ -81,8 +81,31 @@ namespace KepServer.Cid.CidTester
             DoubleTag.NewDataAvailable += (s, e) => Console.WriteLine($"DoubleTag: New data written: {DoubleTag.Value}");
             DateTag.NewDataAvailable += (s, e) => Console.WriteLine($"DateTag: New data written: {DateTag.Value}");
             StringTag.NewDataAvailable += (s, e) => Console.WriteLine($"StringTag: New data written: {StringTag.Value}");
+
+            BoolArrayTag.NewDataAvailable += (s, e) =>
+            {
+                Console.WriteLine("BoolArrayTag: New data written");
+                PrintArray(BoolArrayTag.Value);
+                Console.WriteLine(BoolArrayTag[0, 1].ToString());
+            };
+
         }
 
+
+        private void PrintArray(Array toPrint)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int r = 0; r <= toPrint.GetUpperBound(0); r++)
+            {
+                for (int c = 0; c <= toPrint.GetUpperBound(1); c++)
+                {
+                    sb.Append(toPrint.GetValue(r, c).ToString());
+                    sb.Append(" ");
+                }
+                sb.Append("\n");
+            }
+            Console.WriteLine(sb.ToString());
+        }
 
     }
 }
