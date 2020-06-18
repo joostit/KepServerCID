@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    
+    <PackageId>KepServer.CidLib</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Joost Haverkort (Based on reference code by PTC Kepware)</Authors>
+    <Description>Library for communicating with PTC KepServer CID (Custom Interface Driver) through memory mapping. Note that the application needs to run with admin rights to use this/</Description>
+    <IsPackable>true</IsPackable>
+
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
