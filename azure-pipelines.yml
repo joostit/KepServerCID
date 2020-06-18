@@ -34,7 +34,7 @@ steps:
   inputs:
     command: 'pack'
     arguments: '--configuration $(buildConfiguration)'
-    packagesToPack: 'KepServer.CidLib/KepServer.CidLib.csproj'
+    packagesToPack: 'KepServerCID/KepServer.CidLib/KepServer.CidLib.csproj'
     nobuild: true
     versioningScheme: 'off'
 
