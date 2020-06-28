@@ -187,6 +187,8 @@ namespace KepServer.CidLib.Internals
                     string.Format("{0,0:D}", SharedMemServer.MAPSIZE);
                 Trace.WriteLine(msg);
 
+                throw new InvalidOperationException(msg);
+
                 return (relativeOffset);
             }
 
